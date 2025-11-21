@@ -3,14 +3,15 @@ library(shiny)  # Required to run any Shiny app
 library(ggplot2)  # For creating pretty plots
 library(dplyr)  # For filtering and manipulating data
 library(agridat)  # The package where the data comes from
+library(bslib)
 
 # Loading data ----
 Barley <- as.data.frame(beaven.barley)
 
 # ui.R ----
 ui <- fluidPage(
-  titlePanel("Barley Yield"),  
-  sidebarLayout(  
+  titlePanel("Barley Yield"),
+  sidebarLayout(
     sidebarPanel(
       h3("Inputs for histogram"),
       position = "right",
@@ -25,7 +26,7 @@ ui <- fluidPage(
       sliderInput(inputId = "bin",
                   label = "3. Select number of histogram bins",
                   min = 1,
-                  max = 25, 
+                  max = 25,
                   value = c(10)),
       hr(),
       textInput(inputId = "text",
@@ -40,9 +41,25 @@ ui <- fluidPage(
                tags$p("Visit us at:"),
                tags$a(href = "https://ourcodingclub.github.io", "Coding Club")
       )
-    )  
+    )
   )
 )
+
+ui1 <- page_sidebar(
+  # App title ----
+  title = "Hello Shiny!",
+  # Sidebar panel for inputs ----
+  sidebar = sidebar(
+    # Input: Slider for the number of bins ----
+    sliderInput(inputId = "bins",
+                label = "Number of bins",
+                min = 1,
+                max = 50,
+                value = 30)
+  ),
+  plotOutput(outputId = "distPlot")
+)
+
 
 
 
@@ -64,6 +81,20 @@ server <- function(input, output) {
 }
 
 
+server1 <- function(input, output) {
+  output$distPlot <- renderPlot({
+    x <- faithful$waiting
+    bins <- seq(min(x), max(x), length.out = input$bins+1)
+    
+    hist(x, breaks = bins, col = "purple", border = "white", 
+         xlab = "Waiting time to next eruprion (in mins)",
+         main = "Histogram of waiting times")
+  })
+}
+
 
 # Run the app ----
+#first app
 shinyApp(ui = ui, server = server)
+#second app
+shinyApp(ui = ui1, server = server1)
