@@ -44,16 +44,16 @@ ui <- fluidPage(
     )
   )
 )
-
+#___________________________second app__________________________________________
 ui1 <- page_sidebar(
   # App title ----
-  title = "Hello Shiny!",
+  title = "Hello World!",
   # Sidebar panel for inputs ----
-  sidebar = sidebar(
+  sidebar = sidebar( #убираемая боковая панель!!!!!
     # Input: Slider for the number of bins ----
     sliderInput(inputId = "bins",
                 label = "Number of bins",
-                min = 1,
+                min = 5,
                 max = 50,
                 value = 30)
   ),
@@ -66,7 +66,7 @@ ui1 <- page_sidebar(
 # server.R ----
 server <- function(input, output) {
   output$plot  <- renderPlot(ggplot(Barley, aes(x = yield)) +
-                               geom_histogram(bins = input$bin, fill = "grey", data = Barley[Barley$gen == input$gen,], colour = "black")
+                               geom_histogram(bins = input$bin, fill = input$colour, data = Barley[Barley$gen == input$gen,], colour = "black")
                              )
   
   output$mytext <- renderText(input$text)
@@ -80,13 +80,13 @@ server <- function(input, output) {
                                             "Max" = max(yield)))
 }
 
-
+#___________________________second app__________________________________________
 server1 <- function(input, output) {
   output$distPlot <- renderPlot({
     x <- faithful$waiting
     bins <- seq(min(x), max(x), length.out = input$bins+1)
     
-    hist(x, breaks = bins, col = "purple", border = "white", 
+    hist(x, breaks = bins, col = "skyblue", border = "orange", 
          xlab = "Waiting time to next eruprion (in mins)",
          main = "Histogram of waiting times")
   })
@@ -97,4 +97,4 @@ server1 <- function(input, output) {
 #first app
 shinyApp(ui = ui, server = server)
 #second app
-shinyApp(ui = ui1, server = server1)
+# shinyApp(ui = ui1, server = server1)
