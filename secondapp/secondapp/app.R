@@ -20,6 +20,12 @@ ui <- page_sidebar(
       )
     ),
     br(),
+    selectInput(
+      inputId = "color",
+      label = "Choose your color",
+      choices = c("snow", "lightblue", "darkgreen", "pink", "black", "darkred"), selected = "darkred"
+    ),
+    hr(),
     sliderInput(
       "n",
       "Number of observations:",
@@ -60,7 +66,7 @@ server <- function(input, output) {
     hist(
       d(),
       main = paste("r", dist, "(", n, ")", sep = ""),
-      col = "forestgreen",
+      col = input$color,
       border = "white"
     )
   })
