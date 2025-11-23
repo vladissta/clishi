@@ -17,7 +17,7 @@ ui <- page_sidebar(
         "Uniform" = "unif",
         "Log-normal" = "lnorm",
         "Exponential" = "exp"
-      )
+      ),
     ),
     br(),
     selectInput(
@@ -32,7 +32,8 @@ ui <- page_sidebar(
       value = 500,
       min = 1, 
       max = 1000
-    )
+    ),
+    position = "right"
   ),
   # Main panel for displaying outputs ----
   # Output: A tabset that combines three panels ----
