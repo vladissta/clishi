@@ -13,6 +13,12 @@ ui <- page_navbar(
       card_image("https://i.pinimg.com/236x/d9/42/66/d94266793cf8cb2220810979e0ae926f.jpg"),
       "Card content"
     ),
+    value_box(
+      title = "Value box",
+      value = "100% of your attention is here",
+      showcase = bsicons::bs_icon("bar-chart"),
+      theme = "red"
+    ),
     "Main contents"
   )
 )
