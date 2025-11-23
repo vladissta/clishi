@@ -8,7 +8,7 @@ library(bslib)
 # Sidebar layout with input and output definitions ----
 ui <- page_sidebar(
   title = "Tabsets",
-  sidevar = sidebar(
+  sidebar = sidebar(
     radioButtons(
       "dist",
       "Distribution type:",
