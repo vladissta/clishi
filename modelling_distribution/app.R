@@ -79,7 +79,8 @@ server <- function(input, output){
     input$generate_graph,
     {
       params <- get_distribution_params(input$distribution, input)
-      samples_mean_df <- generate_samples(input$distribution, params)
+      samples_df <- generate_samples(input$distribution, params)
+      samples_mean_df <- calculate_samples_mean_df(samples_df, params)
       output$distribution_plot <- renderPlot(plot_distribution(samples_mean_df))
     }
   )

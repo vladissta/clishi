@@ -2,7 +2,7 @@ render_distribution_panel <- function(distribution_type) {
   #distribution_type: нормальное, экспоненциальное, равномерное 
   if(distribution_type == "нормальное") {
     return(renderUI({
-      # normal distribution
+      # нормальное распределение
         wellPanel(
           numericInput(
             "mean",
@@ -13,7 +13,7 @@ render_distribution_panel <- function(distribution_type) {
             "sd",
             "Дисперсия",
             value = 1,
-            min = 0
+            min = 1
           ),
           numericInput(
             "sample_size",
@@ -111,3 +111,4 @@ get_distribution_params <- function(distribution_type, input) {
     ))
   }
 }
+  
