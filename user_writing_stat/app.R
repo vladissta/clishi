@@ -175,7 +175,7 @@ server <- function(input, output, session) {
       age_num <- as.numeric(input$age)
       score_num <- as.numeric(input$app_score)
       
-      if (age_num <= 0 | age_num > 100 | is.na(age_num)) {
+      if (is.na(age_num) | age_num <= 0 | age_num > 100) {
         showModal(
           modalDialog(
             title = "Error",

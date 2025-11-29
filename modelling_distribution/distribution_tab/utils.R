@@ -3,22 +3,51 @@ library(tidyverse)
 
 generate_samples <- function(distribution_type, distribution_params) {
   samples_df <- data.frame(
-      id_sample = rep(1:distribution_params[["generation_size"]], each = distribution_params[["sample_size"]]),
-      value = rexp(distribution_params[["generation_size"]] * distribution_params[["sample_size"]], rate = distribution_params[["rate"]])
+    id_sample = rep(
+      1:distribution_params[["generation_size"]], 
+      each = distribution_params[["sample_size"]]
+    )
   )
+  if (distribution_type == "нормальное") {
+    samples_df$value <- rnorm(
+        distribution_params[["generation_size"]] * distribution_params[["sample_size"]], 
+        mean = distribution_params[["mean"]], 
+        sd = distribution_params[["sd"]]
+    )
+  } else if (distribution_type == "экспоненциальное") {
+    samples_df$value <- rexp(
+        distribution_params[["generation_size"]] * distribution_params[["sample_size"]],
+        rate = distribution_params[["rate"]]
+    )
+  } else {
+    samples_df$value <- runif(
+        distribution_params[["generation_size"]] * distribution_params[["sample_size"]],
+        min = distribution_params[["min"]],
+        max = distribution_params[["max"]]
+    )
+  }
   return(samples_df)
 }
 
 
-calculate_samples_mean_df <- function(samples_df, distribution_params) { 
-  # normalized_mean = (mean - true_mean)* sqrt(n) / sd)
+calculate_samples_mean_df <- function(distribution_type,  distribution_params, samples_df) { 
+  if (distribution_type == "нормальное") {
+    true_mean <- distribution_params[["mean"]]
+    sd <- distribution_params[["sd"]]
+  } else if (distribution_type == "экспоненциальное") {
+    true_mean <- 1 / distribution_params[["rate"]]
+    sd <- 1 / distribution_params[["rate"]]
+  } else {
+    true_mean <- (distribution_params[["min"]] + distribution_params[["max"]]) / 2
+    sd <- sqrt((distribution_params[["max"]] - distribution_params[["min"]]) ^2 / 12)
+  }
+  
   samples_mean_df <- samples_df %>%
   group_by(id_sample) %>%
   summarise(mean_sample = mean(value)) %>%
   mutate(
-    normalized_mean_sample = (mean_sample - (1/distribution_params[["rate"]])) * 
-      sqrt(distribution_params[["sample_size"]]) / 
-      sqrt(1/distribution_params[["rate"]]^2)
+    normalized_mean_sample = (mean_sample - true_mean) * 
+      sqrt(distribution_params[["sample_size"]]) /  sd
   ) %>%  
   ungroup()
   return(samples_mean_df)
@@ -52,3 +81,5 @@ plot_distribution <- function(samples_mean_df) {
     )
 
 }
+
+

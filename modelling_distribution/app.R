@@ -78,14 +78,18 @@ server <- function(input, output){
   observeEvent(
     input$generate_graph,
     {
+      #if (!validate_inputs(input)) return()
       params <- get_distribution_params(input$distribution, input)
       samples_df <- generate_samples(input$distribution, params)
-      samples_mean_df <- calculate_samples_mean_df(samples_df, params)
+      samples_mean_df <- calculate_samples_mean_df(
+        distribution_type = input$distribution, 
+        distribution_params = params,
+        samples_df = samples_df
+      )
       output$distribution_plot <- renderPlot(plot_distribution(samples_mean_df))
     }
   )
   
- 
   output$dist_settings <- render_distribution_panel("нормальное")
 }
 
