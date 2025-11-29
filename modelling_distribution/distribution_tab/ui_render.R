@@ -12,17 +12,20 @@ render_distribution_panel <- function(distribution_type) {
           numericInput(
             "sd",
             "Дисперсия",
-            value = 1
+            value = 1,
+            min = 0
           ),
           numericInput(
             "sample_size",
             "Размер выборки",
-            value = 10
+            value = 10,
+            min = 1
           ),
           numericInput(
             "generation_size",
             "Количество генераций",
-            value = 20
+            value = 20,
+            min = 1
           )
         )
       })
@@ -34,17 +37,20 @@ render_distribution_panel <- function(distribution_type) {
           numericInput(
             "rate",
             "Интенсивность",
-            value = 2
+            value = 1.5,
+            min = 0
           ),
           numericInput(
             "sample_size",
             "Размер выборки",
-            value = 10
+            value = 20,
+            min = 1
           ),
           numericInput(
             "generation_size",
             "Количество генераций",
-            value = 20
+            value = 300,
+            min = 1
           )
         )
       })
@@ -66,12 +72,14 @@ render_distribution_panel <- function(distribution_type) {
           numericInput(
             "sample_size",
             "Размер выборки",
-            value = 10
+            value = 10,
+            min = 1
           ),
           numericInput(
             "generation_size",
             "Количество генераций",
-            value = 20
+            value = 20, 
+            min = 1
           )
         )
       })
