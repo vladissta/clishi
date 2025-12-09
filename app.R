@@ -98,12 +98,12 @@ ui <- fluidPage(
     mainPanel(         # СПРАВА: ОСНОВНАЯ ПАНЕЛЬ
       width = 9,
       tabsetPanel(
-        tabPanel("1. Один эксперимент (одна выборка)",
-                 br(),
-                 plotOutput("one_exp_plot", height = "300px"),
-                 br(),
-                 verbatimTextOutput("one_exp_text")
-        ),
+        # tabPanel("1. Один эксперимент (одна выборка)",
+        #          br(),
+        #          plotOutput("one_exp_plot", height = "300px"),
+        #          br(),
+        #          verbatimTextOutput("one_exp_text")
+        # ),
         tabPanel("2. Распределение выборочных средних",
                  br(),
                  uiOutput("hypothesis_text"),
@@ -205,19 +205,21 @@ server <- function(input, output, session) {
   
   # Автообновление μ0 вокруг истинного среднего
   observeEvent(
-    list(
-      input$use_true_mu,
-      input$dist_type,
-      input$norm_mean,
-      input$unif_min,
-      input$unif_max,
-      input$exp_rate
-    ),
-    {if (isTRUE(input$use_true_mu)) {
+    # list(
+    #   input$use_true_mu,
+    #   input$dist_type,
+    #   input$norm_mean,
+    #   input$unif_min,
+    #   input$unif_max,
+    #   input$exp_rate
+    # ),
+    
+    params_list(),
+    {if (input$use_true_mu) {
         updateNumericInput(session, "mu0", value = true_mu())
       }
     },
-    ignoreInit = FALSE
+    # ignoreInit = FALSE
   )
   
   # Текст гипотезы
@@ -226,15 +228,15 @@ server <- function(input, output, session) {
   })
   
   # Основная симуляция
-  sim_res <- eventReactive(input$run, {
-    n     <- input$n
-    n_sim <- input$n_sim
-    alpha_test <- input$alpha
-    conf_level <- input$conf_level
+df_from_sim <- eventReactive(input$run, {
+    # n     <- input$n
+    # n_sim <- input$n_sim
+    # alpha_test <- input$alpha
+    # conf_level <- input$conf_level
     
     validate(
-      need(n >= 2, "Объем выборки должен быть ≥ 2"),
-      need(n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10")
+      need(input$n >= 2, "Объем выборки должен быть ≥ 2"),
+      need(input$n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10")
     )
     
     set.seed(input$seed)
@@ -242,54 +244,69 @@ server <- function(input, output, session) {
     # Генерация выборок из генеральной совокупности
     x <- reactive({
       samples_values_calc(
-        n = n,
-        n_sim = n_sim,
+        n = input$n,
+        n_sim = input$n_sim,
         dist_type = input$dist_type,
         params_list = params_list()
       )
     })
     
-    simulate_fun(
-      n = n,
-      n_sim = n_sim,
-      conf_level = conf_level,
-      alpha_test = alpha_test,
+    simulate_fun_calc_new(
+      n = input$n,
+      n_sim = input$n_sim,
+      conf_level = input$conf_level,
+      alpha_test = input$alpha,
       alt_type = input$alt_type,
       mu0 = input$mu0,
       true_mu = true_mu(),
       true_sd = true_sd(),
-      x = x())
+      x = x()
+    )
+    
+    # simulate_fun(
+    #   n = input$n,
+    #   n_sim = input$n_sim,
+    #   conf_level = input$conf_level,
+    #   alpha_test = input$alpha,
+    #   alt_type = input$alt_type,
+    #   mu0 = input$mu0,
+    #   true_mu = true_mu(),
+    #   true_sd = true_sd(),
+    #   x = x())
+    
+    
   })
   
   # Обновление слайдеров exp_id и ci_range каждый раз после симуляции
-  observeEvent(sim_res(), {
-    res <- sim_res()
-    n_sim <- nrow(res$df)
+observeEvent(df_from_sim(), {
+    # res <- sim_res()
+    # n_sim <- nrow(res$df)
     
     updateSliderInput(session, "exp_id",
-                      max = n_sim,
-                      value = min(1, n_sim))
+                      max = input$n_sim,
+                      value = min(1, input$n_sim))
     
     updateSliderInput(session, "ci_range",
                       min = 1,
-                      max = n_sim,
-                      value = c(1, min(200, n_sim)))
+                      max = input$n_sim,
+                      value = c(1, min(200, input$n_sim)))
   })
   
-  # Один эксперимент (одна выборка)
-  output$one_exp_plot <- renderPlot({
-    stripchart_one_sample_plot(
-      df_from_sim = sim_res()$df,
-      Xmat = sim_res()$Xmat,
-      exp_id = input$exp_id
-    )
-  })
+  # TODO: График и текст для одного эксперимента
+
+  # output$one_exp_plot <- renderPlot({
+  #   stripchart_one_sample_plot(
+  #     df_from_sim = df_from_sim(),
+  #     Xmat = sim_res()$Xmat,
+  #     exp_id = input$exp_id
+  #   )
+  # })
   
   output$one_exp_text <- renderPrint({
     one_exp_text_func(
-      df_from_sim = sim_res()$df,
+      df_from_sim = df_from_sim(),
       exp_id = input$exp_id,
-      alpha_test = sim_res()$alpha_test
+      alpha_test = input$alpha
     )
   })
   
@@ -298,17 +315,17 @@ server <- function(input, output, session) {
   output$means_hist <- renderPlot({
     means_hist_plot(
       n = input$n,
-      df_from_sim = sim_res()$df,
-      true_mu = true_mu(),
-      true_sd = true_sd(),
+      df_from_sim = df_from_sim(),
+      true_mu = isolate(true_mu()),
+      true_sd = isolate(true_sd()),
       mu0 = input$mu0
     )
   })
   
   output$se_summary <- renderPrint({
     se_summary_text_func(
-      df_from_sim = sim_res()$df,
-      conf_level = sim_res()$conf_level,
+      df_from_sim = df_from_sim(),
+      conf_level = input$conf_level,
       true_sd = true_sd(),
       n = input$n
     )
@@ -317,32 +334,32 @@ server <- function(input, output, session) {
   # 2. Доверительные интервалы
   output$ci_plot <- renderPlot({
     ci_func_plot(
-      df_from_sim = sim_res()$df,
+      df_from_sim = df_from_sim(),
       ci_range = input$ci_range,
       show_only_miss = input$show_only_miss,
-      mu0 = sim_res()$mu0,
+      mu0 = input$mu0,
       true_mu = true_mu(),
-      conf_level = sim_res()$conf_level
+      conf_level = input$conf_level
     )
   })
   
   output$ci_table <- renderDT({
     ci_table_calc(
-      df_from_sim = sim_res()$df
+      df_from_sim = df_from_sim()
     )
   })
   
   # 3. Распределение p-значений
   output$p_hist <- renderPlot({
-    p_values_hist(
-      df_from_sim = sim_res()$df,
-      alpha_test = sim_res()$alpha_test)
+    p_values_hist_plot(
+      df_from_sim = df_from_sim(),
+      alpha_test = input$alpha)
   })
   
   output$p_summary <- renderPrint({
     p_values_summary_text_func(
-      df_from_sim = sim_res()$df,
-      alpha_test = sim_res()$alpha_test)
+      df_from_sim = df_from_sim(),
+      alpha_test = input$alpha)
   })
   
   
