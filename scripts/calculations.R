@@ -19,21 +19,22 @@ true_sd_calc <- function(dist_type, params_list){
 }
 
 
-# samples_values_calc <- 
-#   function(n, n_sim, dist_type, params_list){
-#   req(n, n_sim, dist_type)
-#   
-#   switch(dist_type,
-#          norm = {rnorm(n*n_sim, mean = params_list$norm_mean, sd = params_list$norm_sd)},
-#          unif = {
-#            validate(need(params_list$unif_max > params_list$unif_min, 
-#                          "Для равномерного распределения необходимо, чтобы b > a"))
-#            runif(n * n_sim, min = params_list$unif_min, max = params_list$unif_max)},
-#          
-#          exp = {rexp(n*n_sim, rate = params_list$exp_rate)})
-#   }
-# 
-# 
+samples_values_calc <-
+  function(n, n_sim, dist_type, params_list){
+  req(n, n_sim, dist_type)
+
+  data.frame(
+    experiment = rep(1:n_sim, each = n),
+    value = switch(dist_type,
+                   norm = {rnorm(n*n_sim, mean = params_list$norm_mean, sd = params_list$norm_sd)},
+                   unif = {
+                     validate(need(params_list$unif_max > params_list$unif_min,
+                                   "Для равномерного распределения необходимо, чтобы b > a"))
+                     runif(n * n_sim, min = params_list$unif_min, max = params_list$unif_max)},
+                   exp = {rexp(n*n_sim, rate = params_list$exp_rate)}))
+  }
+
+
 # simulate_fun_calc <- function(n, n_sim, conf_level, 
 #                          alpha_test, alt_type, 
 #                          mu0, true_mu, true_sd, x){
@@ -97,7 +98,7 @@ true_sd_calc <- function(dist_type, params_list){
 
 # --------------------------------------------------------------------------------
 
-simulate_fun_calc_new <-function(x, n, n_sim, conf_level, 
+simulate_fun_calc_new <-function(simulated_values_df, n, n_sim, conf_level, 
                                  alpha_test, alt_type, 
                                  mu0, true_mu, true_sd){
   
@@ -105,10 +106,7 @@ simulate_fun_calc_new <-function(x, n, n_sim, conf_level,
   t_crit   <- qt(1 - alpha_ci / 2, 
                  df = n - 1)
   
-  df <- 
-    data.frame(
-      experiment = rep(1:n_sim, each = n),
-      value = x) %>% 
+  df <- simulated_values_df %>% 
     group_by(experiment) %>%
     summarize(
       means = mean(value),

@@ -1,27 +1,29 @@
-stripchart_one_sample_plot <- function(df_from_sim, Xmat, exp_id){
+stripchart_one_sample_plot <- function(Xmat, exp_id){
   # res <- sim_res()
-  df  <- df_from_sim
-  id  <- exp_id
+  # df  <- df_from_sim
+  # id  <- exp_id
   # validate(
   #   need(id >= 1 && id <= nrow(df), "Неверный номер эксперимента")
   # )
-  x_i <- Xmat[id, ]
   
-  stripchart(x_i, 
+  x_i <- Xmat[Xmat$experiment == exp_id, ]$value
+  average <- mean(x_i)
+
+  stripchart(x_i,
              method = "jitter", pch = 16,
-             main = paste("Наблюдения одной выборки (эксперимент №", id, ")"),
+             main = paste("Наблюдения одной выборки (эксперимент №", exp_id, ")"),
              xlab = "Наблюдения Xᵢ",
              ylab = "",
              yaxt = "n")
-  
-  abline(v = df$mean[id], col = "blue", lwd = 2)
+
+  abline(v = average, col = "blue", lwd = 2)
 }
 
 means_hist_plot <- function(n, df_from_sim, true_mu, true_sd, mu0){
     # res <- sim_res()
     df <- df_from_sim
     
-    hist(df$mean,                          # df$mean — вектор из n_sim выборочных средних
+    hist(df$means,   # df$means — вектор из n_sim выборочных средних
          breaks = 30,
          freq = FALSE,
          main = "Распределение выборочных средних (оценок математического ожидания)",
@@ -32,11 +34,11 @@ means_hist_plot <- function(n, df_from_sim, true_mu, true_sd, mu0){
     theor_se <- true_sd / sqrt(n)     # теоретическая SE( \bar{X} )
     
     #  Диапазон оси X: учитываем и данные, и μ, и μ0
-    x_min <- min(df$mean)
-    x_max <- max(df$mean)
+    x_min <- min(df$means)
+    x_max <- max(df$means)
     x_lim <- range(c(x_min, x_max, theor_mu, mu0))
     
-    hist(df$mean,
+    hist(df$means,
          breaks = 30,
          freq   = FALSE,
          xlim   = x_lim,   
@@ -85,7 +87,7 @@ ci_func_plot <- function(df_from_sim,
     validate(need(n_sim_sub > 0, 
                   "В выбранном диапазоне нет доверительных интервалов для отображения"))
     
-    plot(df$experiment, df$mean,
+    plot(df$experiment, df$means,
          ylim = range(c(df$ci_low, df$ci_high, mu0, true_mu)),
          xlab = "Номер эксперимента",
          ylab = "Выборочное среднее и ДИ для математического ожидания",

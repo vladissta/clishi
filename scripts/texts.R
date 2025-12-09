@@ -30,8 +30,8 @@ one_exp_text_func <- function(df_from_sim, exp_id, alpha_test){
   row <- df[df$experiment == id, ]
   
   cat("Эксперимент (выборка) №", id, "\n\n")
-  cat("Выборочное среднее \\bar{X}   =", round(row$mean, 4), "\n")
-  cat("Выборочное SD                  =", round(row$sd, 4), "\n")
+  cat("Выборочное среднее \\bar{X}   =", round(row$means, 4), "\n")
+  cat("Выборочное SD                  =", round(row$sds, 4), "\n")
   cat("Стандартная ошибка SE          =", round(row$se, 4), "\n")
   cat("Доверительный интервал для μ   = [", round(row$ci_low, 4), ";", round(row$ci_high, 4), "]\n")
   cat("p-value t-теста для H₀: μ = μ₀ =", signif(row$p_value, 4), "\n\n")

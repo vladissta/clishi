@@ -98,12 +98,12 @@ ui <- fluidPage(
     mainPanel(         # СПРАВА: ОСНОВНАЯ ПАНЕЛЬ
       width = 9,
       tabsetPanel(
-        # tabPanel("1. Один эксперимент (одна выборка)",
-        #          br(),
-        #          plotOutput("one_exp_plot", height = "300px"),
-        #          br(),
-        #          verbatimTextOutput("one_exp_text")
-        # ),
+        tabPanel("1. Один эксперимент (одна выборка)",
+                 br(),
+                 plotOutput("one_exp_plot", height = "300px"),
+                 br(),
+                 verbatimTextOutput("one_exp_text")
+        ),
         tabPanel("2. Распределение выборочных средних",
                  br(),
                  uiOutput("hypothesis_text"),
@@ -182,10 +182,6 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  # observeEvent(
-  #   input$dist_type,
-  #   output$dist_params <- dist_params(input$dist_type)
-  # )
   
   params_list <- eventReactive(input$run,{
     list(
@@ -228,7 +224,7 @@ server <- function(input, output, session) {
   })
   
   # Основная симуляция
-df_from_sim <- eventReactive(input$run, {
+  samples_values_simulated <- eventReactive(input$run, {
     # n     <- input$n
     # n_sim <- input$n_sim
     # alpha_test <- input$alpha
@@ -242,7 +238,7 @@ df_from_sim <- eventReactive(input$run, {
     set.seed(input$seed)
     
     # Генерация выборок из генеральной совокупности
-    x <- reactive({
+ 
       samples_values_calc(
         n = input$n,
         n_sim = input$n_sim,
@@ -250,6 +246,8 @@ df_from_sim <- eventReactive(input$run, {
         params_list = params_list()
       )
     })
+  
+  df_from_sim <- reactive({
     
     simulate_fun_calc_new(
       n = input$n,
@@ -260,7 +258,7 @@ df_from_sim <- eventReactive(input$run, {
       mu0 = input$mu0,
       true_mu = true_mu(),
       true_sd = true_sd(),
-      x = x()
+      simulated_values_df = samples_values_simulated()
     )
     
     # simulate_fun(
@@ -294,13 +292,13 @@ observeEvent(df_from_sim(), {
   
   # TODO: График и текст для одного эксперимента
 
-  # output$one_exp_plot <- renderPlot({
-  #   stripchart_one_sample_plot(
-  #     df_from_sim = df_from_sim(),
-  #     Xmat = sim_res()$Xmat,
-  #     exp_id = input$exp_id
-  #   )
-  # })
+  output$one_exp_plot <- renderPlot({
+    stripchart_one_sample_plot(
+      # df_from_sim = df_from_sim(),
+      Xmat = samples_values_simulated(),
+      exp_id = input$exp_id
+    )
+  })
   
   output$one_exp_text <- renderPrint({
     one_exp_text_func(
