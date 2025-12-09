@@ -19,7 +19,7 @@ true_sd_calc <- function(dist_type, params_list){
 }
 
 
-samples_values_calc <-
+samples_values_simulated_calc <-
   function(n, n_sim, dist_type, params_list){
   req(n, n_sim, dist_type)
 
@@ -34,6 +34,61 @@ samples_values_calc <-
                    exp = {rexp(n*n_sim, rate = params_list$exp_rate)}))
   }
 
+
+simulate_fun_calc_new <-function(simulated_values_df, n, n_sim, conf_level, 
+                                 alpha_test, alt_type, 
+                                 mu0, true_mu, true_sd){
+  
+  alpha_ci <- 1 - conf_level
+  t_crit   <- qt(1 - alpha_ci / 2, 
+                 df = n - 1)
+  
+  df <- simulated_values_df %>% 
+    group_by(experiment) %>%
+    summarize(
+      means = mean(value),
+      sds        = sd(value),
+      se         = sds / sqrt(n)) %>% 
+    mutate(
+      ci_low     = means - t_crit * se,
+      ci_high    = means + t_crit * se,
+      t_stat     = (means - mu0) / se) %>% 
+    mutate(
+      p_value    = switch(alt_type,
+                       "two.sided" = 2 * pt(-abs(t_stat), df = n - 1),
+                       "greater"   = 1 - pt(t_stat, df = n - 1),
+                       "less"      = pt(t_stat, df = n - 1)),
+      covers_mu0  = (ci_low <= mu0) & (ci_high >= mu0),
+      covers_true_mu = (ci_low <= true_mu) & (ci_high >= true_mu)) %>% 
+    mutate(
+      reject_H0  = p_value < alpha_test
+    )
+  
+  return(df)
+}
+  
+
+ci_table_calc <- function(df_from_sim){
+  
+  # res <- sim_res()
+  df <- df_from_sim
+  
+  df$means    <- round(df$means, 4)
+  df$se      <- round(df$se, 4)
+  df$ci_low  <- round(df$ci_low, 4)
+  df$ci_high <- round(df$ci_high, 4)
+  df$p_value <- signif(df$p_value, 4)
+  
+  datatable(
+    df,
+    options = list(pageLength = 10),
+    rownames = FALSE
+  )
+  
+}
+
+
+# --------------------------------------------------------------------------------
 
 # simulate_fun_calc <- function(n, n_sim, conf_level, 
 #                          alpha_test, alt_type, 
@@ -97,58 +152,4 @@ samples_values_calc <-
 # }
 
 # --------------------------------------------------------------------------------
-
-simulate_fun_calc_new <-function(simulated_values_df, n, n_sim, conf_level, 
-                                 alpha_test, alt_type, 
-                                 mu0, true_mu, true_sd){
-  
-  alpha_ci <- 1 - conf_level
-  t_crit   <- qt(1 - alpha_ci / 2, 
-                 df = n - 1)
-  
-  df <- simulated_values_df %>% 
-    group_by(experiment) %>%
-    summarize(
-      means = mean(value),
-      sds        = sd(value),
-      se         = sds / sqrt(n)) %>% 
-    mutate(
-      ci_low     = means - t_crit * se,
-      ci_high    = means + t_crit * se,
-      t_stat     = (means - mu0) / se) %>% 
-    mutate(
-      p_value    = switch(alt_type,
-                       "two.sided" = 2 * pt(-abs(t_stat), df = n - 1),
-                       "greater"   = 1 - pt(t_stat, df = n - 1),
-                       "less"      = pt(t_stat, df = n - 1)),
-      covers_mu0  = (ci_low <= mu0) & (ci_high >= mu0),
-      covers_true_mu = (ci_low <= true_mu) & (ci_high >= true_mu)) %>% 
-    mutate(
-      reject_H0  = p_value < alpha_test
-    )
-  
-  return(df)
-}
-  
-# --------------------------------------------------------------------------------
-  
-
-ci_table_calc <- function(df_from_sim){
-  
-  # res <- sim_res()
-  df <- df_from_sim
-  
-  df$means    <- round(df$means, 4)
-  df$se      <- round(df$se, 4)
-  df$ci_low  <- round(df$ci_low, 4)
-  df$ci_high <- round(df$ci_high, 4)
-  df$p_value <- signif(df$p_value, 4)
-  
-  datatable(
-    df,
-    options = list(pageLength = 10),
-    rownames = FALSE
-  )
-  
-}
   

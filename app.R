@@ -211,6 +211,7 @@ server <- function(input, output, session) {
     # ),
     
     params_list(),
+    
     {if (input$use_true_mu) {
         updateNumericInput(session, "mu0", value = true_mu())
       }
@@ -239,7 +240,7 @@ server <- function(input, output, session) {
     
     # Генерация выборок из генеральной совокупности
  
-      samples_values_calc(
+      samples_values_simulated_calc(
         n = input$n,
         n_sim = input$n_sim,
         dist_type = input$dist_type,
@@ -270,12 +271,12 @@ server <- function(input, output, session) {
     #   mu0 = input$mu0,
     #   true_mu = true_mu(),
     #   true_sd = true_sd(),
-    #   x = x())
+    #   simulated_values_df = samples_values_simulated())
     
     
   })
   
-  # Обновление слайдеров exp_id и ci_range каждый раз после симуляции
+# Обновление слайдеров exp_id и ci_range каждый раз после симуляции
 observeEvent(df_from_sim(), {
     # res <- sim_res()
     # n_sim <- nrow(res$df)
@@ -290,11 +291,9 @@ observeEvent(df_from_sim(), {
                       value = c(1, min(200, input$n_sim)))
   })
   
-  # TODO: График и текст для одного эксперимента
 
   output$one_exp_plot <- renderPlot({
     stripchart_one_sample_plot(
-      # df_from_sim = df_from_sim(),
       Xmat = samples_values_simulated(),
       exp_id = input$exp_id
     )
@@ -362,6 +361,7 @@ observeEvent(df_from_sim(), {
   
   
 # HELP: формы генеральных распределений с подсветкой выбранного типа
+  
   output$help_norm <- renderPlot({
     norm_plot_help(input$dist_type)
   })
