@@ -294,7 +294,7 @@ observeEvent(df_from_sim(), {
 
   output$one_exp_plot <- renderPlot({
     stripchart_one_sample_plot(
-      Xmat = samples_values_simulated(),
+      simulated_values_df = samples_values_simulated(),
       exp_id = input$exp_id
     )
   })

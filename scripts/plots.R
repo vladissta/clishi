@@ -1,4 +1,4 @@
-stripchart_one_sample_plot <- function(Xmat, exp_id){
+stripchart_one_sample_plot <- function(simulated_values_df, exp_id){
   # res <- sim_res()
   # df  <- df_from_sim
   # id  <- exp_id
@@ -6,7 +6,7 @@ stripchart_one_sample_plot <- function(Xmat, exp_id){
   #   need(id >= 1 && id <= nrow(df), "Неверный номер эксперимента")
   # )
   
-  x_i <- Xmat[Xmat$experiment == exp_id, ]$value
+  x_i <- simulated_values_df[simulated_values_df$experiment == exp_id, ]$value
   average <- mean(x_i)
 
   stripchart(x_i,
