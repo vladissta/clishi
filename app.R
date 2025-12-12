@@ -5,12 +5,225 @@ library(dplyr)  # For filtering and manipulating data
 library(agridat)  # The package where the data comes from
 library(DT)  # подключает пакет DT для интерактивных таблиц
 
+library(shinydashboard)
+
+
+
 source('scripts/calculations.R')
 source('scripts/plots.R')
 source('scripts/texts.R')
 source('scripts/help_output.R')
 
-ui <- fluidPage(
+ui <- dashboardPage(
+  
+  dashboardHeader(title='CLISHI'),
+  
+  dashboardSidebar(
+    width = 300,
+    sidebarMenu(
+      id = 'tab',
+      
+      menuItem("0. Параметры",
+               tabName = "params"),
+      menuItem("1. Один эксперимент (одна выборка)",
+               tabName = "one_exp"),
+               # icon = icon("dashboard"),
+               # badgeColor = "green"
+               # ),
+      menuItem("2. Распределение выборочных средних",
+               tabName = "means_distr"),
+      menuItem("3. Доверительные интервалы для μ",
+               tabName = "ci_dance"),
+      menuItem("4. Распределение p-значений (t-тест)", 
+               tabName = "pval_distr"),
+      menuItem("5. Критические области t-распределения",
+               tabName = "crit_tdistr"),
+      menuItem("Help", 
+               tabName = "help"),
+      tags$hr(),
+      actionButton("run", "Смоделировать выборки", class = "btn-primary")
+      
+      
+    )), 
+    
+    
+  dashboardBody(
+  
+  tabItems(
+    tabItem(tabName = "params",
+             h2('0. Параметры'),
+             
+            fluidRow(
+              box(
+             h4("Распределение в генеральной совокупности"),
+             
+             # 1. Выбор типа распределения
+             selectInput(                            # виджет «выпадающий список»
+               "dist_type", "Тип распределения",      # имя переменной в Shiny
+               choices = c("Нормальное N(μ, σ²)"      = "norm",  #μ — математическое ожидание, σ² — дисперсия
+                           "Равномерное U(a, b)"      = "unif",
+                           "Экспоненциальное Exp(λ)"  = "exp")
+             ),
+             
+             # Параметры в генеральной совокупности
+             conditionalPanel(               # Панель отображается только когда мы выбираем "norm"
+               "input.dist_type == 'norm'",
+               numericInput("norm_mean", "Истинное среднее (мат. ожидание) μ", 0),   # По умолчанию μ = 0
+               numericInput("norm_sd", "Cтандартное отклонение σ", 1, min = 0.0001)  # По умолчанию σ = 1
+             ),
+             conditionalPanel(               # Панель отображается только когда выбираем "unif"
+               "input.dist_type == 'unif'",
+               numericInput("unif_min", "Минимум a в генеральной совокупности", 0),
+               numericInput("unif_max", "Максимум b в генеральной совокупности", 1)
+             ),
+             conditionalPanel(
+               "input.dist_type == 'exp'", # Панель отображается только когда выбираем "exp"
+               numericInput("exp_rate", "Параметр λ экспоненциального распределения", 1, min = 0.0001)
+             )),
+             
+             # tags$hr(),
+             box(
+             h4("Выборка и симуляции"),
+             numericInput("n", "Объём одной выборки n", value = 30, min = 2, step = 1),
+             numericInput("n_sim", "Число повторений эксперимента (число выборок)", value = 1000, min = 10, step = 10),
+             numericInput("seed", "Фиксация состояния генератора случайных чисел (seed)", value = 1)
+                )
+             ),
+             
+            fluidRow(
+             # tags$hr(),
+            box(
+             h4("Гипотеза о математическом ожидании"),
+             
+             checkboxInput("use_true_mu", "Установить μ₀ = μ (использовать истинное значение параметра)", TRUE),
+             
+             numericInput("mu0", "Гипотетическое значение математического ожидания μ₀ (H₀: μ = μ₀)", value = 0),
+             
+             selectInput("alt_type", "Тип альтернативной гипотезы H₁",         # Пока добавил просто, чтоб потом можно было разыне тестирования 
+                         choices = c("двусторонняя (μ ≠ μ₀)" = "two.sided",
+                                     "правосторонняя (μ > μ₀)" = "greater",
+                                     "левосторонняя (μ < μ₀)" = "less")),
+              ),
+             
+             # tags$hr(),
+             box(
+             h4("Доверительный интервал и уровень значимости α"),
+             sliderInput("conf_level", "Доверительный интервал для математического ожидания",
+                         min = 0.80, max = 0.99, value = 0.95, step = 0.01),
+             numericInput("alpha", "Уровень значимости α для проверки H₀: μ = μ₀", value = 0.05,  #  уровень значимости для проверки гипотезы
+                          
+                          min = 0.001, max = 0.2, step = 0.01),
+             
+             tags$hr(),
+             h4("Отображение доверительных интервалов"),
+             
+             sliderInput(
+               "ci_range", 
+               "Диапазон экспериментов для графика ДИ:",
+               min = 1, 
+               max = 100,          # обновится после симуляции
+               value = c(1, 100), 
+               step = 1
+             ),
+             
+             checkboxInput(
+               "show_only_miss",
+               "Показывать только ДИ, не содержащие истинное мат. ожидание",
+               FALSE
+              )
+             )
+            )
+             
+    ),
+    
+    tabItem(tabName = "one_exp",
+      h2("1. Один эксперимент (одна выборка)"),
+      
+      fluidRow(
+        box(sliderInput("exp_id", "Номер эксперимента (выборки) для детального просмотра",
+                          min = 1, max = 100, value = 1, step = 1),
+            width = 5
+            )),
+      
+        fluidRow(box(
+          br(),
+          plotOutput("one_exp_plot", height = "300px"),
+          br(),
+          verbatimTextOutput("one_exp_text"),
+          width=12
+        )
+      )),
+
+    tabItem(tabName = "means_distr",
+      h2("2. Распределение выборочных средних")
+    ),
+    
+    tabItem(tabName = "ci_dance",
+      h2("3. Доверительные интервалы для μ")
+    ),
+    
+    tabItem(tabName = "pval_distr",
+      h2("4. Распределение p-значений (t-тест)")
+    ),
+    
+    tabItem(tabName = "crit_tdistr",
+      h2("5. Критические области t-распределения")
+    ),
+    
+    tabItem(tabName = "help",
+      h2("Help"),
+      br(),
+      tabsetPanel(
+        tabPanel("Summary",
+                 h3("Распределение случайной величины X в генеральной совокупности"),
+                 p("В левой панели выбирается распределение случайной величины X в генеральной совокупности. ",
+                   "Ниже приведены типичные графики данных распределений. ",
+                   "Выбранное распределение выделено более толстой линией."),
+                 
+                 # fluidRow(
+                 #   column(
+                 #     4,
+                 #     h5("Нормальное распределение"),
+                 #     plotOutput("help_norm", height = "180px")
+                 #   ),
+                 #   column(
+                 #     4,
+                 #     h5("Равномерное распределение"),
+                 #     plotOutput("help_unif", height = "180px")
+                 #   ),
+                 #   column(
+                 #     4,
+                 #     h5("Экспоненциальное распределение"),
+                 #     plotOutput("help_exp", height = "180px")
+                 #   )
+                 # ),
+                 
+                 tags$hr(),
+                 h4("Структура симуляции"),
+                 tags$ul(
+                   tags$li("задается распределение случайной величины X в генеральной совокупности с истинным математическим ожиданием и дисперсией;"),
+                   tags$li("многократно (n_sim раз) генерируются независимые выборки объема n из данного распределения;"),
+                   tags$li("в каждой выборке вычисляется выборочное среднее — точечная оценка истинного математического ожидания;"),
+                   tags$li("формируется эмпирическое распределение выборочных средних;"),
+                   tags$li("строятся доверительные интервалы для параметра μ и выполняется проверка гипотезы H₀: μ = μ₀ с использованием t-статистики.")
+                 )
+        ),
+        
+        tabPanel("Термины",
+                 h3("Основные термины в симуляции")
+                 # текст с определениями далее вставлю....
+        )
+      )
+      
+      
+    )
+  )
+  )
+)
+
+
+
+uixx <- fluidPage(
   withMathJax(), # подключает поддержку LaTeX-формул через MathJax
   
   tags$hr(),
