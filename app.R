@@ -8,7 +8,6 @@ library(DT)  # подключает пакет DT для интерактивн�
 library(shinydashboard)
 
 
-
 source('scripts/calculations.R')
 source('scripts/plots.R')
 source('scripts/texts.R')
@@ -24,25 +23,37 @@ ui <- dashboardPage(
       id = 'tab',
       
       menuItem("0. Параметры",
-               tabName = "params"),
-      menuItem("1. Один эксперимент (одна выборка)",
-               tabName = "one_exp"),
-               # icon = icon("dashboard"),
-               # badgeColor = "green"
-               # ),
-      menuItem("2. Распределение выборочных средних",
-               tabName = "means_distr"),
-      menuItem("3. Доверительные интервалы для μ",
-               tabName = "ci_dance"),
-      menuItem("4. Распределение p-значений (t-тест)", 
-               tabName = "pval_distr"),
-      menuItem("5. Критические области t-распределения",
-               tabName = "crit_tdistr"),
-      menuItem("Help", 
-               tabName = "help"),
-      tags$hr(),
-      actionButton("run", "Смоделировать выборки", class = "btn-primary")
+               tabName = "params",
+               icon = icon("cog", lib = 'glyphicon')),
       
+      menuItem("1. Один эксперимент (одна выборка)",
+               tabName = "one_exp",
+               icon = icon("resize-small", lib = 'glyphicon')),
+
+      menuItem("2. Распределение выборочных средних",
+               tabName = "means_distr",
+               icon = icon("stats", lib = 'glyphicon')),
+      
+      menuItem("3. Доверительные интервалы для μ",
+               tabName = "ci_dance",
+               icon = icon("resize-horizontal", lib = 'glyphicon')),
+      
+      menuItem("4. Распределение p-значений (t-тест)", 
+               tabName = "pval_distr",
+               icon = icon("indent-right", lib = 'glyphicon')),
+      
+      menuItem("5. Критические области t-распределения",
+               tabName = "crit_tdistr", 
+               icon = icon("exclamation-sign", lib = 'glyphicon')),
+      
+      menuItem("Help", 
+               tabName = "help",
+               icon = icon("question-sign", lib = 'glyphicon')),
+      
+      tags$hr(),
+      
+      actionButton("run", "Смоделировать выборки", 
+                   class = "btn-primary")
       
     )), 
     
@@ -155,19 +166,37 @@ ui <- dashboardPage(
       )),
 
     tabItem(tabName = "means_distr",
-      h2("2. Распределение выборочных средних")
+      h2("2. Распределение выборочных средних"),
+      
+      uiOutput("hypothesis_text"),
+      br(),
+      plotOutput("means_hist", height = "350px"),
+      br(),
+      verbatimTextOutput("se_summary")
     ),
     
     tabItem(tabName = "ci_dance",
-      h2("3. Доверительные интервалы для μ")
+      h2("3. Доверительные интервалы для μ"),
+      
+      plotOutput("ci_plot", height = "400px"),
+      br(),
+      DTOutput("ci_table")
     ),
     
     tabItem(tabName = "pval_distr",
-      h2("4. Распределение p-значений (t-тест)")
+      h2("4. Распределение p-значений (t-тест)"),
+      
+      plotOutput("p_hist", height = "350px"),
+      br(),
+      verbatimTextOutput("p_summary")
     ),
     
     tabItem(tabName = "crit_tdistr",
-      h2("5. Критические области t-распределения")
+      h2("5. Критические области t-распределения"),
+      
+      plotOutput("crit_plot", height = "350px"),
+      br(),
+      verbatimTextOutput("crit_text")
     ),
     
     tabItem(tabName = "help",
