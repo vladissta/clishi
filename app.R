@@ -15,6 +15,7 @@ source('scripts/help_output.R')
 
 ui <- dashboardPage(
   
+  
   dashboardHeader(title='CLISHI'),
   
   dashboardSidebar(
@@ -59,6 +60,8 @@ ui <- dashboardPage(
     
     
   dashboardBody(
+    
+  withMathJax(),
   
   tabItems(
     tabItem(tabName = "params",
@@ -97,7 +100,11 @@ ui <- dashboardPage(
              h4("Выборка и симуляции"),
              numericInput("n", "Объём одной выборки n", value = 30, min = 2, step = 1),
              numericInput("n_sim", "Число повторений эксперимента (число выборок)", value = 1000, min = 10, step = 10),
-             numericInput("seed", "Фиксация состояния генератора случайных чисел (seed)", value = 1)
+             
+             numericInput("seed", "Фиксация состояния генератора случайных чисел (seed)", value = 1),
+             checkboxInput("use_random_seed", 
+                           'Новая генерация при каждом нажатии "Смоделировать выборки"',
+                           value=TRUE),
                 )
              ),
              
@@ -243,8 +250,6 @@ ui <- dashboardPage(
                  # текст с определениями далее вставлю....
         )
       )
-      
-      
     )
   )
   )
@@ -254,15 +259,16 @@ ui <- dashboardPage(
 server <- function(input, output, session) {
   
   
-  params_list <- eventReactive(input$run,{
+  params_list <- 
+    eventReactive(input$run, {
+    # reactive({
     list(
       norm_mean  = input$norm_mean,
       norm_sd    = input$norm_sd,
       unif_min   = input$unif_min,
       unif_max   = input$unif_max,
       exp_rate   = input$exp_rate
-    )
-  })
+    )}, ignoreNULL = FALSE)
 
   # Истинное среднее (мат. ожидание) для генеральной совокупности
   true_mu <- reactive(true_mu_calc(input$dist_type, params_list()))
@@ -272,15 +278,7 @@ server <- function(input, output, session) {
   
   # Автообновление μ0 вокруг истинного среднего
   observeEvent(
-    # list(
-    #   input$use_true_mu,
-    #   input$dist_type,
-    #   input$norm_mean,
-    #   input$unif_min,
-    #   input$unif_max,
-    #   input$exp_rate
-    # ),
-    
+
     params_list(),
     
     {if (input$use_true_mu) {
@@ -289,25 +287,26 @@ server <- function(input, output, session) {
     },
     # ignoreInit = FALSE
   )
-  
   # Текст гипотезы
   output$hypothesis_text <- renderUI({
     hypothesis_text_func(mu0 = input$mu0, alt_type = input$alt_type)
   })
   
+  # SEED
+  observeEvent(input$seed, {
+    set.seed(input$seed)
+  }, once = TRUE)
+  
   # Основная симуляция
-  samples_values_simulated <- eventReactive(input$run, {
-    # n     <- input$n
-    # n_sim <- input$n_sim
-    # alpha_test <- input$alpha
-    # conf_level <- input$conf_level
+  samples_values_simulated <- 
+    eventReactive(input$run, {
     
     validate(
       need(input$n >= 2, "Объем выборки должен быть ≥ 2"),
       need(input$n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10")
     )
     
-    set.seed(input$seed)
+      # set.seed(input$seed + input$run)  # SEED!!!
     
     # Генерация выборок из генеральной совокупности
  
@@ -333,24 +332,11 @@ server <- function(input, output, session) {
       simulated_values_df = samples_values_simulated()
     )
     
-    # simulate_fun(
-    #   n = input$n,
-    #   n_sim = input$n_sim,
-    #   conf_level = input$conf_level,
-    #   alpha_test = input$alpha,
-    #   alt_type = input$alt_type,
-    #   mu0 = input$mu0,
-    #   true_mu = true_mu(),
-    #   true_sd = true_sd(),
-    #   simulated_values_df = samples_values_simulated())
-    
     
   })
   
 # Обновление слайдеров exp_id и ci_range каждый раз после симуляции
 observeEvent(df_from_sim(), {
-    # res <- sim_res()
-    # n_sim <- nrow(res$df)
     
     updateSliderInput(session, "exp_id",
                       max = input$n_sim,
