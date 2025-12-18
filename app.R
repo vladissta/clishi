@@ -1,11 +1,9 @@
 # Packages ----
-library(shiny)  # Required to run any Shiny app
-library(ggplot2)  # For creating pretty plots
-library(dplyr)  # For filtering and manipulating data
-library(agridat)  # The package where the data comes from
-library(DT)  # подключает пакет DT для интерактивных таблиц
-
+library(shiny)
 library(shinydashboard)
+library(ggplot2)
+library(dplyr)
+library(DT)
 
 
 source('scripts/calculations.R')
@@ -14,7 +12,6 @@ source('scripts/texts.R')
 source('scripts/help_output.R')
 
 ui <- dashboardPage(
-  
   
   dashboardHeader(title='CLISHI'),
   
@@ -101,10 +98,10 @@ ui <- dashboardPage(
              numericInput("n", "Объём одной выборки n", value = 30, min = 2, step = 1),
              numericInput("n_sim", "Число повторений эксперимента (число выборок)", value = 1000, min = 10, step = 10),
              
-             numericInput("seed", "Фиксация состояния генератора случайных чисел (seed)", value = 1),
-             checkboxInput("use_random_seed", 
-                           'Новая генерация при каждом нажатии "Смоделировать выборки"',
-                           value=TRUE),
+             numericInput("seed", "Фиксация состояния генератора случайных чисел (seed)", value = 42),
+             # checkboxInput("use_random_seed", 
+             #               'Новая генерация при каждом нажатии "Смоделировать выборки"',
+             #               value=TRUE),
                 )
              ),
              
