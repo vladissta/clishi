@@ -30,7 +30,7 @@ one_exp_text_func <- function(df_from_sim, exp_id, alpha_test){
   row <- df[df$experiment == id, ]
   
   cat("Эксперимент (выборка) №", id, "\n\n")
-  cat("Выборочное среднее \\bar{X}   =", round(row$means, 4), "\n")
+  cat("Выборочное среднее X̄ =", round(row$means, 4), "\n")
   cat("Выборочное SD                  =", round(row$sds, 4), "\n")
   cat("Стандартная ошибка SE          =", round(row$se, 4), "\n")
   cat("Доверительный интервал для μ   = [", round(row$ci_low, 4), ";", round(row$ci_high, 4), "]\n")
@@ -53,12 +53,13 @@ one_exp_text_func <- function(df_from_sim, exp_id, alpha_test){
 }
 
 
+
 se_summary_text_func <- function(df_from_sim, conf_level, true_sd, n) {
   df <- df_from_sim
   
   cat("Эмпирическое распределение выборочных средних:\n")
-  cat("Среднее выборочных средних  E(\\bar{X})_emp =", round(mean(df$means), 4), "\n")
-  cat("Эмпирическое SD(\\bar{X}) =", round(sd(df$means), 4),
+  cat("Среднее выборочных средних  E(X̄)_emp =", round(mean(df$means), 4), "\n")
+  cat("Эмпирическое SD(X) =", round(sd(df$means), 4),
       "   (теоретическая стандартная ошибка SE =",
       round(true_sd / sqrt(n), 4), ")\n\n")
   

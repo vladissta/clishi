@@ -4,6 +4,7 @@ library(shinydashboard)
 library(ggplot2)
 library(dplyr)
 library(DT)
+library()
 
 
 source('scripts/calculations.R')
@@ -14,12 +15,10 @@ source('scripts/help_output.R')
 ui <- dashboardPage(
   
   dashboardHeader(title='CLISHI'),
-  
   dashboardSidebar(
     width = 300,
     sidebarMenu(
       id = 'tab',
-      
       menuItem("0. Параметры",
                tabName = "params",
                icon = icon("cog", lib = 'glyphicon')),
@@ -57,9 +56,7 @@ ui <- dashboardPage(
     
     
   dashboardBody(
-    
-  withMathJax(),
-  
+  # withMathJax(),
   tabItems(
     tabItem(tabName = "params",
              h2('0. Параметры'),
@@ -302,8 +299,6 @@ server <- function(input, output, session) {
       need(input$n >= 2, "Объем выборки должен быть ≥ 2"),
       need(input$n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10")
     )
-    
-      # set.seed(input$seed + input$run)  # SEED!!!
     
     # Генерация выборок из генеральной совокупности
  
