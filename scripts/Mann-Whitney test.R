@@ -41,7 +41,7 @@ library(tidyverse)
 
 mann_whitney <- function(distribution = "normal", 
                          mu_1 = 20,
-                         sigma_1=20,
+                         sigma_1=2,
                          mu_2 = 20,
                          sigma_2 = 2,
                          sample_size = 30, 

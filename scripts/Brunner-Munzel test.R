@@ -39,11 +39,13 @@ library(tidyverse)
 library(brunnermunzel)
 
 brunner_munzel <- function(distribution = "normal", 
-                         param_1 = list(mu = 20, sigma = 2), 
-                         param_2 = list(mu = 20, sigma = 2), 
-                         sample_size = 30, 
-                         n_sim = 1000, 
-                         alpha = 0.05) {
+                           mu_1 = 20,
+                           sigma_1=2,
+                           mu_2 = 20,
+                           sigma_2 = 2,
+                           sample_size = 30, 
+                           n_sim = 1000, 
+                           alpha = 0.05) {
   # Генерация данных и проведение теста
   # ====================================
   if (distribution == "normal") {
@@ -53,12 +55,12 @@ brunner_munzel <- function(distribution = "normal",
       data.frame(
         experiment_ID = rep(1:n_sim, each = sample_size), # ID эксперимента
         group = "1", # Метка группы
-        value = rnorm(sample_size*n_sim, mean = param_1$mu, sd = param_1$sigma) # Параметры нормального распределения
+        value = rnorm(sample_size*n_sim, mean = mu_1, sd = sigma_1) # Параметры нормального распределения
       ),
       data.frame(
         experiment_ID = rep(1:n_sim, each = sample_size),
         group = "2",
-        value = rnorm(sample_size*n_sim, mean = param_2$mu, sd = param_2$sigma)
+        value = rnorm(sample_size*n_sim, mean = mu_2, sd = sigma_2)
       )
     )
     # Обработка данных с использованием tidyverse
@@ -83,12 +85,12 @@ brunner_munzel <- function(distribution = "normal",
       data.frame(
         experiment_ID = rep(1:n_sim, each = sample_size),
         group = "1",
-        value = rexp(sample_size*n_sim, rate = 1/param_1$mu)
+        value = rexp(sample_size*n_sim, rate = 1/mu_1)
       ),
       data.frame(
         experiment_ID = rep(1:n_sim, each = sample_size),
         group = "2",
-        value = rexp(sample_size*n_sim, rate = 1/param_2$mu)
+        value = rexp(sample_size*n_sim, rate = 1/mu_2)
       )
     )
     # Аналогичная обработка данных для экспоненциального распределения
