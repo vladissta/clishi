@@ -4,7 +4,7 @@ library(shinydashboard)
 library(ggplot2)
 library(dplyr)
 library(DT)
-library()
+suppressWarnings(library(furrr))
 
 
 source('scripts/calculations.R')
