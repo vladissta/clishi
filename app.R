@@ -56,7 +56,7 @@ ui <- dashboardPage(
     
     
   dashboardBody(
-  # withMathJax(),
+  withMathJax(),
   tabItems(
     tabItem(tabName = "params",
              h2('0. Параметры'),
