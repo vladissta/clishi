@@ -30,8 +30,6 @@
 #' Так как используется `future_map_dbl()`, функция `fun` обязана возвращать ровно одно
 #' числовое значение на каждой итерации.
 #'
-#' @seealso [furrr::future_map_dbl()], [furrr::furrr_options()], [future::plan()]
-#'
 #' @examples
 #' sim_fun <- function(mu, n = 30) mean(rnorm(n, mean = mu, sd = 1))
 #'
@@ -64,7 +62,7 @@ simulation_wrapper <- function(fun,
         args <- c(setNames(list(x), parameter), list(...))
         do.call(fun, args)
       },
-      .options = furrr_options(seed = seed)
+      .options = furrr::furrr_options(seed = seed)
     )
   
   names(output_vector) <- grid
