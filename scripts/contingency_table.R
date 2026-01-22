@@ -172,7 +172,7 @@ generation_binary_experiment <- function(
       event_probability = event_probability,
       exposure_probability = exposure_probability,
       alpha = alpha
-    ),
+    ) / n_sim,
     
     "cohort" = cohort(
       n_sim = n_sim,
@@ -180,7 +180,7 @@ generation_binary_experiment <- function(
       exposure_probability = exposure_probability,
       exposure_proportion= exposure_proportion,
       alpha = alpha
-    ),
+    )/ n_sim,
     
     "case_control" = case_control(
       n_sim = n_sim,
@@ -188,7 +188,7 @@ generation_binary_experiment <- function(
       event_probability = event_probability,
       event_proportion = event_proportion,
       alpha = alpha
-    ),
+    )/ n_sim,
     
     "fisher" = fisher(
       n_sim = n_sim,
@@ -196,6 +196,6 @@ generation_binary_experiment <- function(
       event_proportion = event_proportion,
       exposure_proportion= exposure_proportion,
       alpha = alpha
-    )
+    )/ n_sim
   )
 }

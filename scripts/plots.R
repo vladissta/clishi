@@ -143,7 +143,7 @@ parameters_grid_line_plot <- function(simulation_vector,
     geom_line() +
     scale_y_continuous(breaks = c(0, alpha, seq(0, ymax, by = 0.1)), 
                        limits = c(0, ymax)) +
-    labs(title = paste('Ошибка I рода в завсимости от', parameter_name),
+    labs(title = paste('Ошибка I рода в завсимости от параметра:', parameter_name),
          x = parameter_name, y = 'Ошибка I рода',) +
     geom_hline(aes(yintercept = alpha), col='red', lty=2) +
     theme_bw()
