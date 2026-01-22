@@ -54,7 +54,7 @@ cohort <- function(n_sim, sample_size, exposure_probability = 0.5, exposure_prop
 }
 
 
-case_control <- function(n_sim, sample_size, event_probability = 0.5,  event_proportion, alpha = 0.05) {
+case_control <- function(n_sim, sample_size, event_probability = 0.5, event_proportion, alpha = 0.05) {
   n_case <- as.integer(round(sample_size * event_proportion)) 
   n_ctrl <- sample_size - n_case
   
@@ -118,7 +118,7 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion, al
 #' @param event (Опционально) Доля случаев для дизайна случай-контроль,
 #' эксперимента Фишера.
 #' @param method Строка. Тип дизайна исследования. Возможные значения:
-#' \code{"cross-sectional"}, \code{"cohort"}, \code{"case-control"}, \code{"fisher"}.
+#' \code{"cross_sectional"}, \code{"cohort"}, \code{"case_control"}, \code{"fisher"}.
 #'   
 #' @return Возвращает одно число (integer) — количество симуляций,
 #' в которых p-value оказалось меньше заданного уровня alpha.
@@ -133,7 +133,7 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion, al
 #' generation_binary_experiment(
 #'   n_sim = 100,
 #'   sample_size = 50,
-#'   method = "cross-sectional"
+#'   method = "cross_sectional"
 #' )
 generation_binary_experiment <- function(
     n_sim,
@@ -143,7 +143,59 @@ generation_binary_experiment <- function(
     exposure_proportion,
     event_proportion,
     alpha = 0.05,
-    method = c("cross-sectional", "cohort", "case-control", "fisher")
+    method = c("cross_sectional", "cohort", "case_control", "fisher")
 ) {
+  assert_int(n_sim, lower = 1)
+  assert_int(sample_size, lower = 1)
+  assert_choice(method, c("cross_sectional", "cohort", "case_control", "fisher"))
+  assert_number(alpha, lower = 0.001, upper = 0.999)
+  
+  if (method %in% c("cross_sectional", "case_control")) {
+    assert_number(event_probability, lower = 0.001, upper = 0.999)
+  }
+  if (method %in% c("cross_sectional", "cohort")) {
+    assert_number(exposure_probability, lower = 0.001, upper = 0.999)
+  }
+  if (method %in% c("case_control", "fisher")) {
+    assert_number(event_proportion, lower = 0.001, upper = 0.999)
+  }
+  if (method %in% c("cohort", "fisher")) {
+    assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
+  }
+ 
 
+  switch(
+    match.arg(method),
+    "cross_sectional" = cross_sectional(
+      n_sim = n_sim,
+      sample_size = sample_size,
+      event_probability = event_probability,
+      exposure_probability = exposure_probability,
+      alpha = alpha
+    ),
+    
+    "cohort" = cohort(
+      n_sim = n_sim,
+      sample_size = sample_size,
+      exposure_probability = exposure_probability,
+      exposure_proportion= exposure_proportion,
+      alpha = alpha
+    ),
+    
+    "case_control" = case_control(
+      n_sim = n_sim,
+      sample_size = sample_size,
+      event_probability = event_probability,
+      event_proportion = event_proportion,
+      alpha = alpha
+    ),
+    
+    "fisher" = fisher(
+      n_sim = n_sim,
+      sample_size = sample_size,
+      event_proportion = event_proportion,
+      exposure_proportion= exposure_proportion,
+      alpha = alpha
+    )
+  )
 }
