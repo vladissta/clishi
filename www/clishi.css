@@ -1,0 +1,186 @@
+/* ===== CliShi absolute overlay logo (NOT home) ===== */
+.clishi-fixed-logo{
+  position: absolute;
+  top: 8px;           /* прижать к верху */
+  left: 10px;         /* прижать к левому краю */
+  z-index: 9999;      /* поверх всего */
+  pointer-events: none; /* чтобы не мешал кликам по бургеру/табам */
+}
+.clishi-fixed-logo img{
+  height: 60px;       /* размер логотипа */
+  width: auto;
+  display: block;
+}
+
+
+/* ===== Header dark like sidebar ===== */
+.skin-blue .main-header .navbar { background-color:#222d32 !important; }
+.skin-blue .main-header .logo   { background-color:#1e282c !important; border-right:1px solid rgba(255,255,255,0.06); }
+.skin-blue .main-header .logo:hover { background-color:#1e282c !important; }
+.skin-blue .main-sidebar { background-color:#1e282c !important; }
+
+/* Убираем текст в зоне logo (чтобы не было CLISHI) */
+.skin-blue .main-header .logo span{ display:none !important; }
+
+/* ===== Tabs in header ===== */
+.clishi-top-tabs { display:inline-block; }
+.clishi-top-tabs .nav-tabs { border-bottom:0 !important; margin:0 !important; }
+.clishi-top-tabs .nav-tabs > li { margin-bottom:0 !important; }
+.clishi-top-tabs .nav-tabs > li > a{
+  color:#b8c7ce !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:6px !important;
+  padding:8px 10px !important;
+  margin-right:6px !important;
+  font-size:13px !important;
+  line-height:1.1 !important;
+  white-space:nowrap;
+}
+.clishi-top-tabs .nav-tabs > li > a:hover{
+  color:#ffffff !important;
+  background:rgba(255,255,255,0.08) !important;
+}
+.clishi-top-tabs .nav-tabs > li.active > a,
+.clishi-top-tabs .nav-tabs > li.active > a:hover,
+.clishi-top-tabs .nav-tabs > li.active > a:focus{
+  color:#ffffff !important;
+  background:rgba(255,255,255,0.16) !important;
+  border:0 !important;
+}
+
+/* ===== Sidebar brand (HOME only) ===== */
+.clishi-sidebar-brand{
+  padding: 14px 14px 10px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.clishi-sidebar-brand-title{
+  color:#ffffff;
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  margin-bottom: 6px;
+}
+.clishi-sidebar-brand-subtitle{
+  color:#b8c7ce;
+  font-size: 12.5px;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+.clishi-sidebar-brand-version{
+  color: rgba(184,199,206,0.75);
+  font-size: 12px;
+}
+
+/* ===== Sticky footer ===== */
+/* ===== FIXED sidebar footer buttons ===== */
+.clishi-sticky-footer{
+  position: fixed;                 /* ВАЖНО чтобы она оставалась фиксированной*/
+  bottom: 0;
+  left: 0;
+  width: 300px;                    /* ширина sidebar */
+  padding: 10px;
+  background: #1e282c;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  z-index: 1000;
+}
+
+/* чтобы контент sidebar не залезал под кнопки */
+.skin-blue .sidebar{
+  padding-bottom: 120px !important;          /* запас под 2 кнопки */
+}
+
+/* ===== Sidebar typography ===== */
+.skin-blue .sidebar a { color:#b8c7ce; }
+.skin-blue .sidebar .control-label { font-weight:600; color:#d8e2e6; }
+.skin-blue .sidebar .form-control { border-radius:6px; }
+.skin-blue .sidebar .form-group { margin-bottom:10px; }
+
+/* ===== Home cards ===== */
+.clishi-card{
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px 16px 14px 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  margin-bottom: 14px;
+}
+.clishi-card h3{ margin:0 0 8px 0; font-weight:800; }
+.clishi-card p{ margin:0 0 10px 0; color:#5a6772; }
+
+
+
+/* ===== Boxes ===== */
+.box { border-radius: 10px; }
+.box-header { border-top-left-radius: 10px; border-top-right-radius: 10px; }
+.box-body { padding: 14px; }
+
+/* ===== Hide top_block tabs completely ===== */
+#top_block { display:none !important; }
+
+/* ===== Header compact logo (badge) ===== */
+.clishi-header-logo{
+  height: 50px;
+  display:flex;
+  align-items:center;
+  padding-left: 10px;
+  padding-top: 6px;    /* <-- чуть ниже, как ты просил */
+}
+.clishi-header-logo-img{
+  height: 40px;
+  width: auto;
+  display:block;
+}
+
+
+/* кликабельные карточки на HOME */
+.clishi-card-click{
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  border: 1px solid rgba(0,0,0,0.06);
+  opacity: 0.92;
+  position: relative;
+}
+
+.clishi-card-click:hover{
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.14);
+  border-color: rgba(0,0,0,0.10);
+}
+
+.clishi-card-click:active{
+  transform: translateY(0px) scale(0.99);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.clishi-card-click::after{
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.04);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  pointer-events: none;
+}
+
+.clishi-card-click:hover::after{
+  opacity: 1;
+}
+
+.clishi-card-click h3{
+  transition: color 0.15s ease;
+}
+
+.clishi-card-click:hover h3{
+  color: #2b3e50;  
+}
+
+.clishi-card-click{
+  border: 2px solid transparent;
+}
+
+.clishi-card-click:hover{
+  border-color: rgba(60,141,188,0.5);
+}
