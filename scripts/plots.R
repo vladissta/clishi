@@ -1,22 +1,64 @@
-stripchart_one_sample_plot <- function(simulated_values_df, exp_id){
-  # res <- sim_res()
-  # df  <- df_from_sim
-  # id  <- exp_id
-  # validate(
-  #   need(id >= 1 && id <= nrow(df), "Неверный номер эксперимента")
-  # )
+stripchart_one_sample_plot <- function(simulated_values_df, exp_id, mu0, true_mu, conf_level){
   
-  x_i <- simulated_values_df[simulated_values_df$experiment == exp_id, ]$value
-  average <- mean(x_i)
-
-  stripchart(x_i,
-             method = "jitter", pch = 16,
-             main = paste("Наблюдения одной выборки (эксперимент №", exp_id, ")"),
-             xlab = "Наблюдения Xᵢ",
-             ylab = "",
-             yaxt = "n")
-
-  abline(v = average, col = "blue", lwd = 2)
+  # 1) выборка эксперимента (вектор)
+  x_i <- simulated_values_df$value[simulated_values_df$experiment == exp_id]
+  
+  xbar <- mean(x_i)
+  s    <- sd(x_i)
+  n    <- length(x_i)
+  
+  # 2) t-interval
+  alpha <- 1 - conf_level
+  tcrit <- qt(1 - alpha/2, df = n - 1)
+  se    <- s / sqrt(n)
+  ci_l  <- xbar - tcrit * se
+  ci_u  <- xbar + tcrit * se
+  
+  # 3) диапазон X, чтобы всё помещалось
+  xlim <- range(c(x_i, mu0, true_mu, ci_l, ci_u))
+  
+  # 4) график точек
+  stripchart(
+    x_i,
+    method = "jitter",
+    pch = 16,
+    main = paste("Наблюдения одной выборки (эксперимент №", exp_id, ")"),
+    xlab = "Наблюдения Xᵢ",
+    ylab = "",
+    yaxt = "n",
+    xlim = xlim
+  )
+  
+  # 5) доверительный интервал как "скобка" (усики) и бледнее
+  y_ci <- 1
+  arrows(
+    x0 = ci_l, y0 = y_ci,
+    x1 = ci_u, y1 = y_ci,
+    angle = 90, code = 3, length = 0.06,
+    col = "gray55", lwd = 2
+  )
+  
+  # 6) линии:
+  # выборочное среднее
+  abline(v = xbar, col = "darkgreen", lwd = 2)
+  # гипотетическое значение mu0
+  abline(v = mu0, col = "red", lwd = 2, lty = 2)
+  # истинное мат. ожидание mu
+  abline(v = true_mu, col = "blue", lwd = 2, lty = 3)
+  
+  # 7) подпись CI сверху
+  mtext(sprintf("CI: [%.3f; %.3f]", ci_l, ci_u),
+        side = 3, line = 0.2, cex = 0.9)
+  
+  # 8) легенда
+  legend(
+    "topright",
+    legend = c(expression(bar(X)), expression(mu[0]), expression(mu), "Доверительный интервал"),
+    col    = c("darkgreen", "red", "blue", "gray55"),
+    lwd    = c(2, 2, 2, 2),
+    lty    = c(1, 2, 3, 1),
+    bty    = "n"
+  )
 }
 
 means_hist_plot <- function(n, df_from_sim, true_mu, true_sd, mu0){
