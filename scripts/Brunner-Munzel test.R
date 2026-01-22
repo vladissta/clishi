@@ -151,7 +151,7 @@ brunner_munzel <- function(distribution = "normal",
   results <- df_experiment %>%
     # Вложение и группировка данных для каждого эксперимента
     nest(.by = experiment_ID) %>% 
-    # Применение критерия Манна-Уитни к каждому набору данных
+    # Применение критерия Бруннера-Мюнцеля к каждому набору данных
     mutate(test_result = purrr::map(data, ~brunnermunzel::brunnermunzel.test(value ~ group, .x))) %>% 
     # Извлечение результатов теста в табличный формат
     mutate(result = purrr::map(test_result, ~broom::tidy(.x))) %>% 
