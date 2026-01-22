@@ -41,8 +41,6 @@
 #'              n_sim = 2000)
 #'
 
-library(tidyr)
-
 mann_whitney <- function(distribution = "normal", 
                          mu1 = 20, sigma1 = 2, 
                          mu2 = 20, sigma2 = 2, 
