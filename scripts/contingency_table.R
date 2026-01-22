@@ -145,49 +145,5 @@ generation_binary_experiment <- function(
     alpha = 0.05,
     method = c("cross-sectional", "cohort", "case-control", "fisher")
 ) {
-  assert_int(n_sim, lower = 1)
-  assert_int(sample_size, lower = 1)
-  assert_number(event_probability, lower = 0.001, upper = 0.999)
-  assert_number(exposure_probability, lower = 0.001, upper = 0.999)
-  assert_number(alpha, lower = 0.001, upper = 0.999)
-  assert_number(event_proportion, lower = 0.001, upper = 0.999)
-  assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
-  assert_choice(method, c("cross-sectional", "cohort", "case-control", "fisher"))
 
-  switch(
-    match.arg(method),
-    "cross-sectional" = cross_sectional(
-      n_sim = n_sim,
-      sample_size = sample_size,
-      event_probability = event_probability,
-      exposure_probability = exposure_probability,
-      alpha = alpha
-    ),
-    
-    "cohort" = cohort(
-      n_sim = n_sim,
-      sample_size = sample_size,
-      event_probability = event_probability,
-      exposure_probability = exposure_probability,
-      exposure_proportion= exposure_proportion,
-      alpha = alpha
-    ),
-    
-    "case-control" = case_control(
-      n_sim = n_sim,
-      sample_size = sample_size,
-      event_probability = event_probability,
-      exposure_probability = exposure_probability,
-      event_proportion = event_proportion,
-      alpha = alpha
-    ),
-    
-    "fisher" = fisher(
-      n_sim = n_sim,
-      sample_size = sample_size,
-      event_proportion = event_proportion,
-      exposure_proportion= exposure_proportion,
-      alpha = alpha
-    )
-  )
 }
