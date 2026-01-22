@@ -19,37 +19,81 @@ hypothesis_text_func <- function(mu0, alt_type) {
     )))
 }
 
-
-one_exp_text_func <- function(df_from_sim, exp_id, alpha_test){
-  df  <- df_from_sim
-  id  <- exp_id
-  # validate(
-    # need(id >= 1 && id <= nrow(df), "Неверный номер эксперимента")
-  # )
+one_exp_text_func <- function(df_from_sim, exp_id, alpha_test,
+                              mu0, true_mu, conf_level, use_true_mu){
   
-  row <- df[df$experiment == id, ]
+  validate(
+    need(exp_id >= 1 && exp_id <= nrow(df_from_sim), "Неверный номер эксперимента")
+  )
   
-  cat("Эксперимент (выборка) №", id, "\n\n")
-  cat("Выборочное среднее X̄ =", round(row$means, 4), "\n")
-  cat("Выборочное SD                  =", round(row$sds, 4), "\n")
-  cat("Стандартная ошибка SE          =", round(row$se, 4), "\n")
-  cat("Доверительный интервал для μ   = [", round(row$ci_low, 4), ";", round(row$ci_high, 4), "]\n")
-  cat("p-value t-теста для H₀: μ = μ₀ =", signif(row$p_value, 4), "\n\n")
+  row <- df_from_sim[exp_id, , drop = FALSE]
   
-  cat("Интерпретация для данной выборки:\n")
+  # --- аккуратно забираем поля (названия могут отличаться) ---
+  xbar <- if ("means" %in% names(row)) row$means else row$mean
+  s    <- if ("sd" %in% names(row)) row$sd else NA
+  se   <- if ("se" %in% names(row)) row$se else NA
+  ci_l <- if ("ci_low" %in% names(row)) row$ci_low else row$ci_l
+  ci_u <- if ("ci_high" %in% names(row)) row$ci_high else row$ci_u
+  pval <- if ("p_value" %in% names(row)) row$p_value else row$pval
   
-  cat("- Доверительный интервал для μ ",
-      ifelse(row$covers_true_mu, "покрывает", "не покрывает"),
-      " истинное математическое ожидание μ.\n", sep = "")
+  covers_mu    <- isTRUE(row$covers_true_mu)     # должно быть в df_from_sim
+  covers_mu0   <- (mu0 >= ci_l && mu0 <= ci_u)   # считаем сами, чтобы не зависеть от df
+  reject_H0    <- (pval < alpha_test)
   
-  cat("- Доверительный интервал ",
-      ifelse(row$covers_mu0, "покрывает", "не покрывает"),
-      " гипотетическое значение μ₀.\n", sep = "")
+  # Ошибка I рода возможна ТОЛЬКО если H0 истинна (μ0 = μ), т.е. use_true_mu = TRUE
+  type1_error  <- isTRUE(use_true_mu) && reject_H0
   
-  cat("- На основе p-value = ", signif(row$p_value, 4),
-      " нулевая гипотеза H₀: μ = μ₀ ",
-      ifelse(row$reject_H0, "отвергается", "не отвергается"),
-      " при уровне α = ", alpha_test, ".\n", sep = "")
+  # --- Заголовок/данные эксперимента ---
+  cat("Эксперимент (выборка) №", exp_id, "\n", sep = "")
+  cat("Уровень доверия CI =", conf_level, "\n")
+  cat("Уровень значимости α =", alpha_test, "\n\n")
+  
+  cat(sprintf("Выборочное среднее x̄ = %.4f\n", xbar))
+  if (!is.na(s))  cat(sprintf("Выборочное SD = %.4f\n", s))
+  if (!is.na(se)) cat(sprintf("Стандартная ошибка SE = %.4f\n", se))
+  cat(sprintf("Доверительный интервал для μ = [%.4f; %.4f]\n", ci_l, ci_u))
+  cat(sprintf("p-value t-теста для H₀: μ = μ₀ = %.4f : p = %.6f\n\n", mu0, pval))
+  
+  # --- Универсальные фразы про CI ---
+  ci_mu_line  <- if (covers_mu)  "• Доверительный интервал для μ покрывает истинное математическое ожидание μ."
+  else             "• Доверительный интервал для μ НЕ покрывает истинное математическое ожидание μ."
+  ci_mu0_line <- if (covers_mu0) "• Доверительный интервал покрывает гипотетическое значение μ₀."
+  else             "• Доверительный интервал НЕ покрывает гипотетическое значение μ₀."
+  
+  # --- Решение по H0 ---
+  h0_line <- if (reject_H0) {
+    sprintf("• При уровне значимости α = %.3f нулевая гипотеза H₀: μ = μ₀ отвергается (p = %.6f).",
+            alpha_test, pval)
+  } else {
+    sprintf("• При уровне значимости α = %.3f нулевая гипотеза H₀: μ = μ₀ не отвергается (p = %.6f).",
+            alpha_test, pval)
+  }
+  
+  # --- 3 сценария интерпретации ---
+  cat("Интерпретация для текущей выборки:\n")
+  cat(ci_mu_line, "\n")
+  cat(ci_mu0_line, "\n")
+  cat(h0_line, "\n")
+  
+  if (isTRUE(use_true_mu)) {
+    # Сценарии при H0 истинна
+    if (type1_error) {
+      cat("• Зафиксирована ошибка I рода: H₀ истинна (μ₀ = μ), но была отвергнута.\n")
+    } else {
+      cat("• Ошибки I рода нет: H₀ истинна (μ₀ = μ) и не была отвергнута.\n")
+    }
+  } else {
+    # Сценарии при μ0 != μ (то есть H0 обычно ложная, но пользователь мог поставить любое mu0)
+    cat("• Ошибка I рода в этом режиме НЕ оценивается, потому что μ₀ не приравнен к μ.\n")
+  }
+  
+  # --- Общая информация ---
+  cat("\nОбщая информация:\n")
+  cat("• Истинное математическое ожидание μ является фиксированным, но неизвестным параметром генеральной совокупности и не является случайной величиной.\n")
+  cat("• Каждый построенный доверительный интервал в конкретном эксперименте либо покрывает истинное значение μ, либо не покрывает его.\n")
+  cat(sprintf("• Уровень доверия %.2f означает, что при многократном повторении эксперимента примерно %.0f%% доверительных интервалов будут покрывать μ,\n",
+              conf_level, 100*conf_level))
+  cat("  если выполнены допущения, заложенные в построение интервала.\n")
 }
 
 
