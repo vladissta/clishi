@@ -97,12 +97,13 @@ one_exp_text_func <- function(df_from_sim, exp_id, alpha_test,
 }
 
 
+
 se_summary_text_func <- function(df_from_sim, conf_level, true_sd, n) {
   df <- df_from_sim
   
   cat("Эмпирическое распределение выборочных средних:\n")
-  cat("Среднее выборочных средних  E(\\bar{X})_emp =", round(mean(df$means), 4), "\n")
-  cat("Эмпирическое SD(\\bar{X}) =", round(sd(df$means), 4),
+  cat("Среднее выборочных средних  E(X̄)_emp =", round(mean(df$means), 4), "\n")
+  cat("Эмпирическое SD(X) =", round(sd(df$means), 4),
       "   (теоретическая стандартная ошибка SE =",
       round(true_sd / sqrt(n), 4), ")\n\n")
   
