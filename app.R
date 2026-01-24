@@ -14,6 +14,9 @@ source("scripts/plots.R")
 source("scripts/texts.R")
 source("scripts/ui_components.R")
 source("scripts/ui_block1.R")
+source("scripts/ui_block2.R")
+source("scripts/ui_block3.R")
+source("scripts/ui_block4.R")
 source("scripts/help_output.R")
 
 # Helpers ----
@@ -31,10 +34,28 @@ ui <- dashboardPage(
     tags$li(
       class = "dropdown",
       style = "padding: 0; margin-left: 14px; margin-top: 6px;",
+      
       conditionalPanel(
         condition = "input.top_block == 'block1'",
         create_block1_tabs() # <---
+      ),
+      
+      conditionalPanel(
+        condition = "input.top_block == 'block2'",
+        create_block2_tabs() # <---
+      ),
+      
+      conditionalPanel(
+        condition = "input.top_block == 'block3'",
+        create_block3_tabs() # <---
+      ),
+      
+      conditionalPanel(
+        condition = "input.top_block == 'block4'",
+        create_block4_tabs() # <---
       )
+      
+      
     )
   ),
   
@@ -192,8 +213,7 @@ server <- function(input, output, session) {
     
     validate(
       need(input$n >= 2, "Объем выборки должен быть ≥ 2"),
-      need(input$n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10")
-    )
+      need(input$n_sim >= 10, "Число повторений эксперимента должно быть ≥ 10"))
     
     # Синхронизируем μ0 с текущим μ ТОЛЬКО в момент симуляции
     if (isTRUE(input$use_true_mu)) {
@@ -240,8 +260,7 @@ server <- function(input, output, session) {
     
     if (length(ids) == 0) {
       return(tags$div(style="color:#b8c7ce;",
-                      "Ошибок I рода (p < α) не найдено."))
-    }
+                      "Ошибок I рода (p < α) не найдено."))}
     
     tagList(
       sliderInput(
@@ -252,6 +271,7 @@ server <- function(input, output, session) {
         value = 1,
         step = 1
       ),
+      
       tags$small(
         style="color:#b8c7ce; display:block; margin-top:6px;",
         sprintf("Найдено: %d из %d (доля = %.3f)", 
