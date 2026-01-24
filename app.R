@@ -12,10 +12,12 @@ library(shinyjs)
 source("scripts/calculations.R")
 source("scripts/plots.R")
 source("scripts/texts.R")
+source("scripts/ui_components.R")
+source("scripts/ui_block1.R")
 source("scripts/help_output.R")
 
 # Helpers ----
-default_seed <- 42
+DEFAULT_SEED <- 42
 
 # UI ----
 ui <- dashboardPage(
@@ -25,66 +27,29 @@ ui <- dashboardPage(
     titleWidth = 320,
     title = tags$span(""),  
   
-    
     # Верхняя панель: подпункты блока 1
     tags$li(
       class = "dropdown",
       style = "padding: 0; margin-left: 14px; margin-top: 6px;",
       conditionalPanel(
         condition = "input.top_block == 'block1'",
-        tags$div(
-          class = "clishi-top-tabs",
-          tabsetPanel(
-            id = "block1_subtab",
-            type = "tabs",
-            selected = "one_exp",
-            tabPanel("1. Одна выборка", value = "one_exp"),
-            tabPanel("2. Выборочные средние", value = "means"),
-            tabPanel("3. Доверительные интервалы", value = "ci"),
-            tabPanel("4. p-value", value = "pval"),
-            tabPanel("5. Критические области t-распределения", value = "crit"),
-            tabPanel("Help", value = "help")
-          )
-        )
+        create_block1_tabs() # <---
       )
     )
   ),
   
-  dashboardSidebar(
+dashboardSidebar(
     width = 320,
     
-    # 
     conditionalPanel(
       condition = "!input.top_block || input.top_block == 'home'",
-      tags$div(
-        class = "clishi-sidebar-brand",
-        tags$div(class = "clishi-sidebar-brand-title", "CliShi"),
-        tags$div(
-          class = "clishi-sidebar-brand-subtitle",
-          "Interactive Clinical Research Simulator - Shiny Application"
-        ),
-        tags$div(class = "clishi-sidebar-brand-version", "v 1.0 (beta)")
-      )
-    ),
+      create_sidebar_brand()), # <---
     
     # Динамическая часть (параметры)
     uiOutput("sidebar_inputs"),
     
     # Sticky footer: кнопки
-    tags$div(
-      class = "clishi-sticky-footer",
-      
-      conditionalPanel(
-        condition = "input.top_block == 'block1'",
-        actionButton("run", "Смоделировать выборки", class = "btn-primary btn-block"),
-        tags$div(style = "height:8px;")
-      ),
-      
-      conditionalPanel(
-        condition = "input.top_block && input.top_block != 'home'",
-        actionButton("go_home", "\u2190 Назад к выбору блоков", class = "btn-default btn-block")
-      )
-    )
+    create_sidebar_footer_buttons() # <---
   ),
   
   dashboardBody(
@@ -96,7 +61,7 @@ ui <- dashboardPage(
       tags$script(src = "clishi.js")
     ),
     
-    # Hidden controller for blocks
+    # Hidden controller for blocks TODO!
     tabsetPanel(
       id = "top_block",
       type = "tabs",
@@ -111,172 +76,21 @@ ui <- dashboardPage(
     # Логотип показываем ТОЛЬКО внутри блоков (НЕ home)
     conditionalPanel(
       condition = "input.top_block && input.top_block != 'home'",
-      tags$div(
-        class = "clishi-fixed-logo",
-        tags$img(src = "clishi_hex_transparent.png", alt = "CliShi")
-      )
-    ),
+      create_fixed_logo()), # <---
     
     # HOME (выбор блоков) — кликабельные карточки 
     conditionalPanel(
       condition = "input.top_block == 'home' || !input.top_block",
-      fluidRow(
-        box(
-          width = 12,
-          title = NULL,
-          solidHeader = FALSE,
-          
-          tags$div(
-            style = "text-align:center; margin-bottom:20px;",
-            tags$img(src = "clishi_logo.png", height = "180px", alt = "CliShi logo")
-          ),
-          
-          # BLOCK 1
-          tags$div(
-            class = "clishi-card clishi-card-click",
-            onclick = "Shiny.setInputValue('go_block1', Math.random(), {priority: 'event'})",
-            tags$h3("Моделирование и проверка гипотез"),
-            tags$p("Симуляции, распределения выборочных средних, ДИ, p-value, критические области.")
-          ),
-          
-          # BLOCK 2
-          tags$div(
-            class = "clishi-card clishi-card-click",
-            onclick = "Shiny.setInputValue('go_block2', Math.random(), {priority: 'event'})",
-            tags$h3("Оценка зависимости результатов теста от величины параметра"),
-            tags$p("Сравнение тестов при изменении эффекта/параметров (планируется).")
-          ),
-          
-          # BLOCK 3
-          tags$div(
-            class = "clishi-card clishi-card-click",
-            onclick = "Shiny.setInputValue('go_block3', Math.random(), {priority: 'event'})",
-            tags$h3("Расчет выборки классическими методами"),
-            tags$p("Классические формулы для n, α, power, effect (планируется).")
-          ),
-          
-          # BLOCK 4
-          tags$div(
-            class = "clishi-card clishi-card-click",
-            onclick = "Shiny.setInputValue('go_block4', Math.random(), {priority: 'event'})",
-            tags$h3("Расчет выборки методом имитационного моделирования"),
-            tags$p("Симуляционный подбор n под заданную мощность (планируется).")
-          )
-        )
-      )
+      create_home_page() # <---
     ),
+    
     # -------------------------
     # BLOCK 1 (контент переключается по input$block1_subtab)
     # -------------------------
+    
     conditionalPanel(
       condition = "input.top_block == 'block1'",
-      
-      # 1) One experiment
-      conditionalPanel(
-        condition = "input.block1_subtab == 'one_exp'",
-        fluidRow(
-          box(
-            width = 5,
-            sliderInput(
-              "exp_id",
-              "Номер эксперимента (выборки) для детального просмотра",
-              min = 1, max = 100, value = 1, step = 1
-            )
-          ),
-          box(
-            width = 7,
-            uiOutput("type1_slider_ui")  # <--  слайдер ошибок I рода
-          )
-        ),
-        fluidRow(
-          box(
-            width = 12,
-            br(),
-            plotOutput("one_exp_plot", height = "300px"),
-            br(),
-            verbatimTextOutput("one_exp_text")
-          )
-        )
-      ),
-      
-      # 2) Means
-      conditionalPanel(
-        condition = "input.block1_subtab == 'means'",
-        uiOutput("hypothesis_text"),
-        br(),
-        plotOutput("means_hist", height = "350px"),
-        br(),
-        verbatimTextOutput("se_summary")
-      ),
-      
-      # 3) CI
-      conditionalPanel(
-        condition = "input.block1_subtab == 'ci'",
-        h4("Отображение доверительных интервалов"),
-        sliderInput(
-          "ci_range",
-          "Диапазон экспериментов для графика ДИ:",
-          min = 1, max = 100,
-          value = c(1, 100), step = 1
-        ),
-        checkboxInput(
-          "show_only_miss",
-          "Показывать только ДИ, не содержащие истинное мат. ожидание",
-          FALSE
-        ),
-        tags$hr(),
-        plotOutput("ci_plot", height = "400px"),
-        br(),
-        DTOutput("ci_table")
-      ),
-      
-      # 4) p-values
-      conditionalPanel(
-        condition = "input.block1_subtab == 'pval'",
-        plotOutput("p_hist", height = "350px"),
-        br(),
-        verbatimTextOutput("p_summary")
-      ),
-      
-      # 5) Critical regions
-      conditionalPanel(
-        condition = "input.block1_subtab == 'crit'",
-        plotOutput("crit_plot", height = "350px"),
-        br(),
-        verbatimTextOutput("crit_text")
-      ),
-      
-      # Help
-      conditionalPanel(
-        condition = "input.block1_subtab == 'help'",
-        br(),
-        tabsetPanel(
-          tabPanel(
-            "Summary",
-            h3("Распределение случайной величины X в генеральной совокупности"),
-            p(
-              "В левой панели выбирается распределение случайной величины X в генеральной совокупности. ",
-              "Ниже приведены типичные графики данных распределений. ",
-              "Выбранное распределение выделено более толстой линией."
-            ),
-            fluidRow(
-              column(4, h5("Нормальное распределение"), plotOutput("help_norm", height = "180px")),
-              column(4, h5("Равномерное распределение"), plotOutput("help_unif", height = "180px")),
-              column(4, h5("Экспоненциальное распределение"), plotOutput("help_exp", height = "180px"))
-            ),
-            tags$hr(),
-            h4("Структура симуляции"),
-            tags$ul(
-              tags$li("задается распределение случайной величины X в генеральной совокупности с истинным математическим ожиданием и дисперсией;"),
-              tags$li("многократно (n_sim раз) генерируются независимые выборки объема n из данного распределения;"),
-              tags$li("в каждой выборке вычисляется выборочное среднее — точечная оценка истинного математического ожидания;"),
-              tags$li("формируется эмпирическое распределение выборочных средних;"),
-              tags$li("строятся доверительные интервалы для параметра μ и выполняется проверка гипотезы H₀: μ = μ₀ с использованием t-статистики.")
-            )
-          ),
-          tabPanel("Термины", h3("Основные термины в симуляции"))
-        )
-      )
+      create_block1_content() # <---
     ),
     
     # -------------------------
@@ -314,19 +128,19 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "top_block", selected = "block1")
     updateTabsetPanel(session, "block1_subtab", selected = "one_exp")
   })
-  
+
   observeEvent(input$go_block2, {
     updateTabsetPanel(session, "top_block", selected = "block2")
   })
-  
+
   observeEvent(input$go_block3, {
     updateTabsetPanel(session, "top_block", selected = "block3")
   })
-  
+
   observeEvent(input$go_block4, {
     updateTabsetPanel(session, "top_block", selected = "block4")
   })
-  
+
   # --- Назад на главную ---
   observeEvent(input$go_home, {
     updateTabsetPanel(session, "top_block", selected = "home")
@@ -335,129 +149,12 @@ server <- function(input, output, session) {
   
   # Sidebar
   output$sidebar_inputs <- renderUI({
-    req(input$top_block)
-    
-    if (input$top_block != "block1") {
-      return(NULL)
-    }
+    req(input$top_block == "block1")
     tagList(
-      h4("Распределение в генеральной совокупности"),
-      
-      selectInput(
-        "dist_type", "Тип распределения",
-        choices = c(
-          "Нормальное N(μ, σ²)" = "norm",
-          "Равномерное U(a, b)" = "unif",
-          "Экспоненциальное Exp(λ)" = "exp"
-        )
-      ),
-      
-      conditionalPanel(
-        "input.dist_type == 'norm'",
-        fluidRow(
-          column(
-            6,
-            numericInput(
-              "norm_mean",
-              HTML("<span data-toggle='tooltip' title='Истинное среднее (математическое ожидание)'>μ</span>"),
-              0
-            )
-          ),
-          column(
-            6,
-            numericInput(
-              "norm_sd",
-              HTML("<span data-toggle='tooltip' title='Стандартное отклонение'>σ</span>"),
-              1,
-              min = 0.0001
-            )
-          )
-        )
-      ),
-      
-      conditionalPanel(
-        "input.dist_type == 'unif'",
-        numericInput(
-          "unif_min",
-          HTML("<span data-toggle='tooltip' title='Нижняя граница равномерного распределения (параметр a)'>a</span>"),
-          0
-        ),
-        numericInput(
-          "unif_max",
-          HTML("<span data-toggle='tooltip' title='Верхняя граница равномерного распределения (параметр b)'>b</span>"),
-          1
-        )
-      ),
-      conditionalPanel(
-        "input.dist_type == 'exp'",
-        numericInput(
-          "exp_rate",
-          HTML("<span data-toggle='tooltip' title='Параметр интенсивности экспоненциального распределения (λ)'>λ</span>"),
-          1,
-          min = 0.0001
-        )
-      ),
-      
-      
-      tags$hr(),
-      h4("Выборка и симуляции"),
-      
-      # ---- tooltip для n ----
-      numericInput(
-        "n",
-        HTML("<span data-toggle='tooltip' title='Размер выборки (объём одной выборки)'>n</span>"),
-        value = 30, min = 2, step = 1
-      ),
-      # -------------------------------------------
-      
-      numericInput("n_sim", HTML("<span data-toggle='tooltip' title='Число повторений эксперимента (число выборок)'>n<sub>sim</sub></span>"),
-                   value = 1000, min = 10, step = 10),
-      
-      tags$hr(),
-      h4("Гипотеза о математическом ожидании"),
-      
-      fluidRow(
-        column(
-          6,
-          checkboxInput(
-            "use_true_mu",
-            HTML("<span data-toggle='tooltip' title='Если включено, устанавливаем μ₀ равным истинному μ (и фиксируем поле μ₀)'>μ₀ = μ</span>"),
-            TRUE
-          )
-        ),
-        column(
-          6,
-          numericInput(
-            "mu0",
-            HTML("<span data-toggle='tooltip' title='Гипотетическое значение математического ожидания (H₀: μ = μ₀)'>μ₀</span>"),
-            value = 0
-          )
-        )
-      ),
-      
-      selectInput(
-        "alt_type",
-        HTML("<span data-toggle='tooltip' title='Тип альтернативной гипотезы H₁'>H₁</span>"),
-        choices = c(
-          "двусторонняя (μ ≠ μ₀)" = "two.sided",
-          "правосторонняя (μ > μ₀)" = "greater",
-          "левосторонняя (μ < μ₀)" = "less"
-        ), selected = "two.sided"
-      ),
-      
-      tags$hr(),
-      h4("Доверительный интервал и уровень значимости α"),
-      
-      sliderInput(
-        "conf_level",
-        HTML("<span data-toggle='tooltip' title='Доверительный интервал'>CI</span>"),
-        min = 0.80, max = 0.99, value = 0.95, step = 0.01
-      ),
-      numericInput(
-        "alpha",
-        HTML("<span data-toggle='tooltip' title='Уровень значимости α для проверки H₀'>α</span>"),
-        value = 0.05, min = 0.001, max = 0.2, step = 0.01
-      )
+      sidebar_block1_dist_inputs(),
+      sidebar_block1_sample_inputs(),
+      sidebar_block1_hypothesis_inputs(),
+      sidebar_block1_test_inputs()
     )
   })
   
@@ -503,7 +200,7 @@ server <- function(input, output, session) {
       updateNumericInput(session, "mu0", value = true_mu())
     }
     
-    set.seed(default_seed)
+    set.seed(DEFAULT_SEED)
     
     samples_values_simulated_calc(
       n = input$n,
@@ -528,23 +225,22 @@ server <- function(input, output, session) {
   })
   
   type1_ids <- reactive({
-    df <- df_from_sim()
-    alpha <- input$alpha
-    which(df$p_value < alpha)
+    which(df_from_sim()$p_value < input$alpha)
   })
   
   output$type1_slider_ui <- renderUI({
-    req(input$top_block == "block1")
-    req(input$block1_subtab == "one_exp")   # показывать на вкладке "Одна выборка"
+    req(input$top_block == "block1", input$block1_subtab == "one_exp")   # показывать на вкладке "Одна выборка"
     
     if (!isTRUE(input$use_true_mu)) {
-      return(tags$div(style="color:#b8c7ce;", "Включи μ₀ = μ, чтобы отобразить ошибки I рода."))
+      return(tags$div(style="color:#b8c7ce;",
+                      "Включи μ₀ = μ, чтобы отобразить ошибки I рода."))
     }
     
     ids <- type1_ids()
     
     if (length(ids) == 0) {
-      return(tags$div(style="color:#b8c7ce;", "Ошибок I рода (p < α) не найдено при текущих параметрах."))
+      return(tags$div(style="color:#b8c7ce;",
+                      "Ошибок I рода (p < α) не найдено."))
     }
     
     tagList(
@@ -558,8 +254,9 @@ server <- function(input, output, session) {
       ),
       tags$small(
         style="color:#b8c7ce; display:block; margin-top:6px;",
-        paste0("Найдено: ", length(ids), " из ", input$n_sim,
-               " (доля = ", round(length(ids)/input$n_sim, 3), ")")
+        sprintf("Найдено: %d из %d (доля = %.3f)", 
+                length(ids), input$n_sim, 
+                length(ids) / input$n_sim)
       )
     )
   })
@@ -568,16 +265,16 @@ server <- function(input, output, session) {
     req(isTRUE(input$use_true_mu))
     ids <- type1_ids()
     req(length(ids) > 0)
-    
-    exp_selected <- ids[input$type1_pick]
-    updateSliderInput(session, "exp_id", value = exp_selected)
+    updateSliderInput(session, "exp_id", 
+                      value = ids[input$type1_pick])
   }, ignoreInit = TRUE)
   
   observeEvent(df_from_sim(), {
     updateSliderInput(
       session, "exp_id",
       max = input$n_sim,
-      value = min(1, input$n_sim)
+      # value = min(1, input$n_sim)
+      value = 1
     )
     
     try(
@@ -591,7 +288,10 @@ server <- function(input, output, session) {
     )
   })
   
-  # Outputs
+  # ---------------------
+  # OUTPUTS
+  # ---------------------
+  
   output$one_exp_plot <- renderPlot({
     stripchart_one_sample_plot(
       simulated_values_df = samples_values_simulated(),
@@ -635,9 +335,10 @@ server <- function(input, output, session) {
   })
   
   output$ci_plot <- renderPlot({
-    ci_rng <- input$ci_range
-    if (is.null(ci_rng) || length(ci_rng) != 2) {
-      ci_rng <- c(1, min(100, input$n_sim))
+    ci_rng <- if (is.null(input$ci_range) || length(input$ci_range) != 2) {
+      c(1, min(100, input$n_sim))
+    } else {
+      input$ci_range
     }
     
     ci_func_plot(
@@ -669,98 +370,23 @@ server <- function(input, output, session) {
   })
   
   output$crit_plot <- renderPlot({
-    df <- df_from_sim()
-    id <- input$exp_id
-    
-    validate(need(id >= 1 && id <= nrow(df), "Неверный номер эксперимента"))
-    
-    if ("statistic" %in% names(df)) {
-      t_obs <- df$statistic[id]
-    } else if ("t_stat" %in% names(df)) {
-      t_obs <- df$t_stat[id]
-    } else if ("t" %in% names(df)) {
-      t_obs <- df$t[id]
-    } else {
-      validate(need(FALSE, "В df_from_sim нет t-статистики (нужен столбец statistic / t_stat / t)"))
-    }
-    
-    dfree <- input$n - 1
-    alpha <- input$alpha
-    alt <- input$alt_type
-    
-    x <- seq(-4, 4, length = 400)
-    y <- dt(x, dfree)
-    
-    plot(
-      x, y, type = "l", lwd = 2,
-      main = "Проверка H₀ с использованием критических значений t-статистики",
-      xlab = "t", ylab = "Плотность"
-    )
-    
-    if (alt == "two.sided") {
-      tcrit <- qt(1 - alpha / 2, dfree)
-      
-      polygon(c(x[x < -tcrit], -tcrit),
-              c(y[x < -tcrit], 0),
-              col = rgb(1, 0, 0, 0.3), border = NA)
-      
-      polygon(c(x[x > tcrit], tcrit),
-              c(y[x > tcrit], 0),
-              col = rgb(1, 0, 0, 0.3), border = NA)
-      
-    } else if (alt == "greater") {
-      tcrit <- qt(1 - alpha, dfree)
-      
-      polygon(c(x[x > tcrit], tcrit),
-              c(y[x > tcrit], 0),
-              col = rgb(1, 0, 0, 0.3), border = NA)
-      
-    } else {
-      tcrit <- qt(alpha, dfree)
-      
-      polygon(c(x[x < tcrit], tcrit),
-              c(y[x < tcrit], 0),
-              col = rgb(1, 0, 0, 0.3), border = NA)
-    }
-    
-    abline(v = t_obs, col = "blue", lwd = 2)
-    
-    legend(
-      "topright",
-      legend = c("t-распределение", "t_obs", "Критическая область"),
-      col = c("black", "blue", "red"),
-      lwd = 2,
-      bty = "n"
-    )
+    t_test_crit_plot(
+      df_from_sim = df_from_sim(),
+      exp_id = input$exp_id,
+      n = input$n,
+      alpha = input$alpha, 
+      alt_type = input$alt_type)
   })
   
   output$crit_text <- renderPrint({
-    
     req(input$n, input$alpha, input$alt_type)
     req(df_from_sim())
     
-    alpha <- input$alpha
-    alt <- input$alt_type
-    dfree <- input$n - 1
-    
-    if (alt == "two.sided") {
-      tcrit <- qt(1 - alpha / 2, dfree)
-      cat("Критические значения (двусторонний тест): ±", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если |t_obs| >", round(tcrit, 4), "\n")
-    } else if (alt == "greater") {
-      tcrit <- qt(1 - alpha, dfree)
-      cat("Критическое значение (правосторонний тест):", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если t_obs >", round(tcrit, 4), "\n")
-    } else {
-      tcrit <- qt(alpha, dfree)
-      cat("Критическое значение (левосторонний тест):", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если t_obs <", round(tcrit, 4), "\n")
-    }
-    
-    cat("\nПримечание:\n")
-    cat("- Красная область на графике — критическая область уровня α.\n")
-    cat("- Синяя линия — наблюдаемое значение t-статистики для выбранной выборки.\n")
-  })
+    t_test_crit_text_func(
+      n = input$n, 
+      alpha = input$alpha,
+      alt_type = input$alt_type)
+    })
   
   output$help_norm <- renderPlot({
     req(input$dist_type)

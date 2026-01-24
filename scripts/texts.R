@@ -138,3 +138,29 @@ p_values_summary_text_func <- function(df_from_sim, alpha_test){
   cat("- если...")
   cat("- если...")
 }
+
+t_test_crit_text_func <- function(n, alpha, alt_type){
+    
+    # req(input$n, input$alpha, input$alt_type)
+    # req(df_from_sim())
+    
+    dfree <- n - 1
+    
+    if (alt_type == "two.sided") {
+      tcrit <- qt(1 - alpha / 2, dfree)
+      cat("Критические значения (двусторонний тест): ±", round(tcrit, 4), "\n")
+      cat("Отклоняем H₀, если |t_obs| >", round(tcrit, 4), "\n")
+    } else if (alt_type == "greater") {
+      tcrit <- qt(1 - alpha, dfree)
+      cat("Критическое значение (правосторонний тест):", round(tcrit, 4), "\n")
+      cat("Отклоняем H₀, если t_obs >", round(tcrit, 4), "\n")
+    } else {
+      tcrit <- qt(alpha, dfree)
+      cat("Критическое значение (левосторонний тест):", round(tcrit, 4), "\n")
+      cat("Отклоняем H₀, если t_obs <", round(tcrit, 4), "\n")
+    }
+    
+    cat("\nПримечание:\n")
+    cat("- Красная область на графике — критическая область уровня α.\n")
+    cat("- Синяя линия — наблюдаемое значение t-статистики для выбранной выборки.\n")
+}
