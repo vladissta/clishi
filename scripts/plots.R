@@ -177,6 +177,68 @@ p_values_hist_plot <- function(df_from_sim, alpha_test){
          lwd = 2, lty = 2, col = "red", bty = "n")
 }
 
+t_test_crit_plot <- function(df_from_sim, exp_id, n, alpha, alt_type){
+
+    validate(need(exp_id >= 1 && exp_id <= nrow(df_from_sim), "Неверный номер эксперимента"))
+    
+    if ("statistic" %in% names(df_from_sim)) {
+      t_obs <- df_from_sim$statistic[exp_id]
+    } else if ("t_stat" %in% names(df_from_sim)) {
+      t_obs <- df_from_sim$t_stat[exp_id]
+    } else if ("t" %in% names(df_from_sim)) {
+      t_obs <- df_from_sim$t[exp_id]
+    } else {
+      validate(need(FALSE, "В df_from_sim_from_sim нет t-статистики (нужен столбец statistic / t_stat / t)"))
+    }
+
+    df_from_simree <- n - 1
+    
+    x <- seq(-4, 4, length = 400)
+    y <- dt(x, df_from_simree)
+    
+    plot(
+      x, y, type = "l", lwd = 2,
+      main = "Проверка H₀ с использованием критических значений t-статистики",
+      xlab = "t", ylab = "Плотность"
+    )
+    
+    if (alt_type == "two.sided") {
+      tcrit <- qt(1 - alpha / 2, df_from_simree)
+      
+      polygon(c(x[x < -tcrit], -tcrit),
+              c(y[x < -tcrit], 0),
+              col = rgb(1, 0, 0, 0.3), border = NA)
+      
+      polygon(c(x[x > tcrit], tcrit),
+              c(y[x > tcrit], 0),
+              col = rgb(1, 0, 0, 0.3), border = NA)
+      
+    } else if (alt_type == "greater") {
+      tcrit <- qt(1 - alpha, df_from_simree)
+      
+      polygon(c(x[x > tcrit], tcrit),
+              c(y[x > tcrit], 0),
+              col = rgb(1, 0, 0, 0.3), border = NA)
+      
+    } else {
+      tcrit <- qt(alpha, df_from_simree)
+      
+      polygon(c(x[x < tcrit], tcrit),
+              c(y[x < tcrit], 0),
+              col = rgb(1, 0, 0, 0.3), border = NA)
+    }
+    
+    abline(v = t_obs, col = "blue", lwd = 2)
+    
+    legend(
+      "topright",
+      legend = c("t-распределение", "t_obs", "Критическая область"),
+      col = c("black", "blue", "red"),
+      lwd = 2,
+      bty = "n"
+    )
+}
+
 
 parameters_grid_line_plot <- function(simulation_vector, 
                                       parameter_name, alpha){
