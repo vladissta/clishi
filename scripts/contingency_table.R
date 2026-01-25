@@ -14,68 +14,63 @@ get_contingency_table <- function(data) {
   return(result)
 }
 
+get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
+  result <- c()
+  for (cont_table_num in seq_along(cont_tables)) {
+    if (method == "chi") {
+      result[cont_table_num] <- chisq.test(result[[cont_table_num]], correct = correct)$p.value
+    } else {
+      result[cont_table_num] <- fisher.test(result[[cont_table_num]])$p.value
+    }
+  } 
+  p_count <- sum(result < alpha)
+  return(p_count)
+}
+  
 
-cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposure_probability = 0.5, alpha = 0.05) {
+cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposure_probability = 0.5) {
   data <- tibble(
     experiment = rep(1:n_sim, each = sample_size),
     exposure = rbinom(n_sim * sample_size, size = 1, prob = exposure_probability),
     event = rbinom(n_sim * sample_size, size = 1, prob = event_probability)
   )
   
-  result <- get_contingency_table(data)
-  
-  for (cont_table_num in seq_along(result)) {
-    result[cont_table_num] <- chisq.test(result[[cont_table_num]])$p.value
-  }
-  
-  p_count <- sum(result < alpha)
-  return(p_count)
+  cont_tables <- get_contingency_table(data)
+  return(cont_tables)
 }
 
 
-cohort <- function(n_sim, sample_size, exposure_probability = 0.5, exposure_proportion, alpha = 0.05) {
+cohort <- function(n_sim, sample_size, event_probability = 0.5, exposure_proportion) {
   n_exp   <- as.integer(round(sample_size * exposure_proportion))
   n_unexp <- sample_size - n_exp
   
   data <- tibble(
     experiment = rep(1:n_sim, each = sample_size),
     event = rep(c(rep(1, n_exp), rep(0, n_unexp)), times = n_sim),
-    exposure = rbinom(n_sim * sample_size, size = 1, prob = exposure_probability)
+    exposure = rbinom(n_sim * sample_size, size = 1, prob = event_probability)
   )
   
-  result <- get_contingency_table(data)
-  
-  for (cont_table_num in seq_along(result)) {
-    result[cont_table_num] <- chisq.test(result[[cont_table_num]])$p.value
-  }
-  
-  p_count <- sum(result < alpha)
-  return(p_count)
+  cont_tables <- get_contingency_table(data)
+  return(cont_tables)
 }
 
 
-case_control <- function(n_sim, sample_size, event_probability = 0.5, event_proportion, alpha = 0.05) {
+case_control <- function(n_sim, sample_size, exposure_probability = 0.5, event_proportion) {
   n_case <- as.integer(round(sample_size * event_proportion)) 
   n_ctrl <- sample_size - n_case
   
   data <- tibble(
     experiment = rep(1:n_sim, each = sample_size),
     exposure = rep(c(rep(1, n_case), rep(0, n_ctrl)), times = n_sim),
-    event = c(rbinom(n_sim * sample_size, size = 1, prob = event_probability))
+    event = c(rbinom(n_sim * sample_size, size = 1, prob = exposure_probability))
   )
   
-  result <- get_contingency_table(data)
-  
-  for (cont_table_num in seq_along(result)) {
-    result[cont_table_num] <- chisq.test(result[[cont_table_num]])$p.value
-  }
-  
-  p_count <- sum(result < alpha)
-  return(p_count)
+  cont_tables <- get_contingency_table(data)
+  return(cont_tables)
 }
 
 
-fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion, alpha = 0.05) {
+fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion) {
   n_event <- as.integer(round(sample_size * event_proportion))
   n_noev  <- sample_size - n_event
   n_exp   <- as.integer(round(sample_size * exposure_proportion))
@@ -87,14 +82,8 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion, al
     event = as.vector(replicate(n_sim, sample(c(rep(1, n_event), rep(0, n_noev)))))
   )
   
-  result <- get_contingency_table(data)
-  
-  for (cont_table_num in seq_along(result)) {
-    result[cont_table_num] <- fisher.test(result[[cont_table_num]])$p.value
-  }
-  
-  p_count <- sum(result < alpha)
-  return(p_count)
+  cont_tables <- get_contingency_table(data)
+  return(cont_tables)
 }
 
 
@@ -119,7 +108,7 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion, al
 #' эксперимента Фишера.
 #' @param method Строка. Тип дизайна исследования. Возможные значения:
 #' \code{"cross_sectional"}, \code{"cohort"}, \code{"case_control"}, \code{"fisher"}.
-#'   
+#' @param correct Булево значение. Использование поправки Йейтса (по умолчанию FALSE).
 #' @return Возвращает одно число (integer) — количество симуляций,
 #' в которых p-value оказалось меньше заданного уровня alpha.
 #' 
@@ -143,59 +132,62 @@ generation_binary_experiment <- function(
     exposure_proportion,
     event_proportion,
     alpha = 0.05,
-    method = c("cross_sectional", "cohort", "case_control", "fisher")
+    design = c("cross_sectional", "cohort", "case_control", "fisher"),
+    correct = FALSE,
+    method = "chi"
 ) {
+  print(design)
   assert_int(n_sim, lower = 1)
   assert_int(sample_size, lower = 1)
-  assert_choice(method, c("cross_sectional", "cohort", "case_control", "fisher"))
+  assert_choice(design, c("cross_sectional", "cohort", "case_control", "fisher"))
+  assert_choice(method, c("chi", "fisher"))
   assert_number(alpha, lower = 0.001, upper = 0.999)
   
-  if (method %in% c("cross_sectional", "case_control")) {
+  if (design %in% c("cross_sectional", "case_control")) {
     assert_number(event_probability, lower = 0.001, upper = 0.999)
   }
-  if (method %in% c("cross_sectional", "cohort")) {
+  if (design %in% c("cross_sectional", "cohort")) {
     assert_number(exposure_probability, lower = 0.001, upper = 0.999)
   }
-  if (method %in% c("case_control", "fisher")) {
+  if (design %in% c("case_control", "fisher")) {
     assert_number(event_proportion, lower = 0.001, upper = 0.999)
   }
-  if (method %in% c("cohort", "fisher")) {
+  if (design %in% c("cohort", "fisher")) {
     assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
   }
  
 
-  switch(
-    match.arg(method),
+  cont_tables <- switch(
+    match.arg(design),
     "cross_sectional" = cross_sectional(
       n_sim = n_sim,
       sample_size = sample_size,
       event_probability = event_probability,
-      exposure_probability = exposure_probability,
-      alpha = alpha
+      exposure_probability = exposure_probability
     ),
     
     "cohort" = cohort(
       n_sim = n_sim,
       sample_size = sample_size,
-      exposure_probability = exposure_probability,
-      exposure_proportion= exposure_proportion,
-      alpha = alpha
+      event_probability = event_probability,
+      exposure_proportion = exposure_proportion
     ),
     
     "case_control" = case_control(
       n_sim = n_sim,
       sample_size = sample_size,
-      event_probability = event_probability,
-      event_proportion = event_proportion,
-      alpha = alpha
+      exposure_probability = exposure_probability,
+      event_proportion = event_proportion
     ),
     
     "fisher" = fisher(
       n_sim = n_sim,
       sample_size = sample_size,
       event_proportion = event_proportion,
-      exposure_proportion= exposure_proportion,
-      alpha = alpha
+      exposure_proportion= exposure_proportion
     )
   )
+  print(cont_tables)
+  
+  return(get_test(method, cont_tables, alpha, correct))
 }
