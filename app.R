@@ -170,12 +170,26 @@ server <- function(input, output, session) {
   
   # Sidebar
   output$sidebar_inputs <- renderUI({
-    req(input$top_block == "block1")
-    tagList(
-      sidebar_block1_dist_inputs(),
-      sidebar_block1_sample_inputs(),
-      sidebar_block1_hypothesis_inputs(),
-      sidebar_block1_test_inputs()
+    req(input$top_block)
+    
+    switch(input$top_block,
+           "block1" = tagList(
+             sidebar_block1_dist_inputs(),
+             sidebar_block1_sample_inputs(),
+             sidebar_block1_hypothesis_inputs(),
+             sidebar_block1_test_inputs()
+           ),
+           "block2" = tagList(
+             sidebar_block2_tests_inputs()
+             # sidebar_block2_yyy()
+           ),
+           "block3" = tagList(
+             # sidebar_block3_xxx()
+           ),
+           "block4" = tagList(
+             # sidebar_block4_xxx()
+           ),
+           NULL  # default case (home or other)
     )
   })
   
@@ -249,7 +263,8 @@ server <- function(input, output, session) {
   })
   
   output$type1_slider_ui <- renderUI({
-    req(input$top_block == "block1", input$block1_subtab == "one_exp")   # показывать на вкладке "Одна выборка"
+    req(input$top_block == "block1", 
+        input$block1_subtab == "one_exp")   # показывать на вкладке "Одна выборка"
     
     if (!isTRUE(input$use_true_mu)) {
       return(tags$div(style="color:#b8c7ce;",
@@ -283,10 +298,9 @@ server <- function(input, output, session) {
   
   observeEvent(input$type1_pick, {
     req(isTRUE(input$use_true_mu))
-    ids <- type1_ids()
-    req(length(ids) > 0)
+    req(length(type1_ids()) > 0)
     updateSliderInput(session, "exp_id", 
-                      value = ids[input$type1_pick])
+                      value = type1_ids()[input$type1_pick])
   }, ignoreInit = TRUE)
   
   observeEvent(df_from_sim(), {
