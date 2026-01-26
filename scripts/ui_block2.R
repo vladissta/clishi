@@ -4,15 +4,17 @@ create_block2_tabs <- function() {
   
 }
 
-sidebar_block2_tests_inputs <- function() {
-  
-  tagList(
+sidebar_block2_cores_input <- function() {
     numericInput("cores", "Число ядер для симуляции", 
                  value = 4, 
                  min = 1, 
                  max = availableCores(), 
-                 step = 1),
-    
+                 step = 1)
+}
+
+sidebar_block2_tests_inputs <- function() {
+  
+  tagList(
     h4("Выбор теста"),
     selectInput(
       "test_type", "Статистический тест",
@@ -24,7 +26,6 @@ sidebar_block2_tests_inputs <- function() {
         "Brunner-Munzel тест" = "brunner_munzel"
       )
     ),
-    
     # ============================================
     # T-ONE-SAMPLE
     # ============================================
