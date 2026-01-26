@@ -22,6 +22,9 @@ get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
     } else {
       result[cont_table_num] <- fisher.test(cont_tables[[cont_table_num]])$p.value
     }
+    if (is.na(result[cont_table_num])) {
+      result[cont_table_num] = 0
+    }
   } 
   p_count <- sum(result < alpha)
   return(p_count)
