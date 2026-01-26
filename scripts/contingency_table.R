@@ -7,9 +7,15 @@ library(checkmate)
 get_contingency_table <- function(data) {
   experiments <- unique(data$experiment)
   result <- c()
+  
   for (experiment_num in experiments) {
     experiment_data <- data |> filter(experiment == experiment_num)
-    result[[experiment_num]] <- table(experiment_data$event, experiment_data$exposure) 
+    
+    # Use factor() with levels to ensure a 2x2 table even if counts are 0
+    result[[experiment_num]] <- table(
+      factor(experiment_data$event, levels = c(0, 1)),
+      factor(experiment_data$exposure, levels = c(0, 1))
+    ) 
   }
   return(result)
 }
@@ -26,8 +32,9 @@ get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
       result[cont_table_num] = 0
     }
   } 
-  p_count <- sum(result < alpha)
-  return(p_count)
+  
+  p_frac <- sum(result < alpha) / length(result)
+  return(p_frac)
 }
   
 
@@ -143,8 +150,8 @@ generation_binary_experiment <- function(
     sample_size,
     event_probability = 0.5,
     exposure_probability = 0.5,
-    exposure_proportion,
-    event_proportion,
+    exposure_proportion = 0.5,
+    event_proportion = 0.5,
     alpha = 0.05,
     design = "cross_sectional",
     correct = FALSE,
