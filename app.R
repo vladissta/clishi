@@ -32,9 +32,6 @@ source('scripts/contingency_table.R')
 
 source('scripts/simulation_wrapper.R')
 
-# Helpers ----
-DEFAULT_SEED <- 42
-
 # UI ----
 ui <- dashboardPage(
   skin = "blue",
@@ -195,12 +192,18 @@ server <- function(input, output, session) {
     
     switch(input$top_block,
            "block1" = tagList(
+             numericInput('seed',
+                          create_tooltip("Seed", "Seed для генератора случайных чисел"), 
+                          value = 42, min = 1, step = 1),
              sidebar_block1_dist_inputs(),
              sidebar_block1_sample_inputs(),
              sidebar_block1_hypothesis_inputs(),
              sidebar_block1_test_inputs()
            ),
            "block2" = tagList(
+             numericInput('seed',
+                          create_tooltip("Seed", "Seed для генератора случайных чисел"), 
+                          value = 42, min = 1, step = 1),
              sidebar_block2_tests_inputs()
              # sidebar_block2_yyy()
            ),
@@ -244,6 +247,10 @@ server <- function(input, output, session) {
     hypothesis_text_func(mu0 = input$mu0, alt_type = input$alt_type)
   })
   
+  observeEvent(input$seed, {
+    set.seed(input$seed)
+  })
+  
   samples_values_simulated <- eventReactive(input$run_block1, {
     
     validate(
@@ -254,8 +261,6 @@ server <- function(input, output, session) {
     if (isTRUE(input$use_true_mu)) {
       updateNumericInput(session, "mu0", value = true_mu())
     }
-    
-    set.seed(DEFAULT_SEED)
     
     samples_values_simulated_calc(
       n = input$n,
@@ -487,7 +492,7 @@ server <- function(input, output, session) {
                      input$parameter_to,
                      by = input$parameter_by),
           cores = input$cores,
-          seed = DEFAULT_SEED,
+          seed = input$seed,
           n_sim = input$n_sim,
           alpha = input$alpha
         )
