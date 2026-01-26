@@ -163,6 +163,10 @@ mann_whitney <- function(distribution = "normal",
   # Вычисление вероятности ошибки I рода критерия
   # =============================
   # Вероятность ошибки I рода = доля p-значений, меньших alpha
+  
+  
+  print(results)
+  
   return(sum(results$p.value < alpha)/n_sim)
   
 }

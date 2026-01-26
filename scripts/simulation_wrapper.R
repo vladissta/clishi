@@ -68,6 +68,5 @@ simulation_wrapper <- function(fun,
     )
   
   names(output_vector) <- grid
-  print(output_vector)
   return(output_vector)
 }

@@ -1,9 +1,18 @@
+library(future)
+
 create_block2_tabs <- function() {
   
 }
 
 sidebar_block2_tests_inputs <- function() {
+  
   tagList(
+    numericInput("cores", "Число ядер для симуляции", 
+                 value = 4, 
+                 min = 1, 
+                 max = availableCores(), 
+                 step = 1),
+    
     h4("Выбор теста"),
     selectInput(
       "test_type", "Статистический тест",
@@ -16,100 +25,177 @@ sidebar_block2_tests_inputs <- function() {
       )
     ),
     
+    # ============================================
+    # T-ONE-SAMPLE
+    # ============================================
     conditionalPanel(
-      "input.test_type == 't_one_sample'",
+      condition = "input.test_type == 't_one_sample'",
       selectInput(
-        "dist_type", "Тип распределения",
+        "dist_type_sim", "Тип распределения",
         choices = c(
-          "Нормальное N(μ, σ²)" = "norm",
-          # "Равномерное U(a, b)" = "unif",
-          "Экспоненциальное Exp(λ)" = "exp"
+          "Нормальное N(μ, σ²)" = "normal",
+          "Экспоненциальное Exp(λ)" = "exponential"
         )
       ),
       fluidRow(
-        column(4, numericInput("mu_0", create_tooltip("μ_0", "Истинное среднее"), 0)),
-        column(4, numericInput("mu", create_tooltip("μ", "Cреднее выборок"), 0)),
-        column(4, numericInput("sigma", create_tooltip("σ", "Стандартное отклонение выборок"), 1, min = 0.0001))
+        column(4, numericInput("mu_0", "μ₀", value = 0)),
+        column(4, numericInput("mu", "μ", value = 0)),
+        column(4, numericInput("sigma", "σ", value = 1, min = 0.0001))
       )
     ),
+    
+    # ============================================
+    # T-TWO-SAMPLE
+    # ============================================
     conditionalPanel(
-      "input.test_type == 't_two_sample'",
+      condition = "input.test_type == 't_two_sample'",
       selectInput(
-        "dist_type", "Тип распределения",
+        "dist_type_sim", "Тип распределения",
         choices = c(
-          "Нормальное N(μ, σ²)" = "norm",
-          # "Равномерное U(a, b)" = "unif",
-          "Экспоненциальное Exp(λ)" = "exp"
+          "Нормальное N(μ, σ²)" = "normal",
+          "Экспоненциальное Exp(λ)" = "exponential"
         )
       ),
       h5("Выборка 1", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(4, numericInput("mu1", create_tooltip("μ_1", "Cреднее выборки 1"), 0)),
-        column(4, numericInput("sigma1", create_tooltip("σ_1", "Стандартное отклонение выборки 1"), 1, min = 0.0001))
+        column(6, numericInput("mu1", "μ₁", value = 0)),
+        column(6, numericInput("sigma1", "σ₁", value = 1, min = 0.0001))
       ),
       h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(4, numericInput("mu2", create_tooltip("μ_2", "Cреднее выборки 2"), 0)),
-        column(4, numericInput("sigma2", create_tooltip("σ_2", "Стандартное отклонение выборки 2"), 1, min = 0.0001))
+        column(6, numericInput("mu2", "μ₂", value = 0)),
+        column(6, numericInput("sigma2", "σ₂", value = 1, min = 0.0001))
       )
     ),
     
-    # conditionalPanel(
-    #   "input.test_type == 'contingency_tables'",
-    #   fluidRow(
-    #     column(4, numericInput("mu_1", create_tooltip("μ_1", "Cреднее выборки 1"), 0)),
-    #     column(4, numericInput("sigma", create_tooltip("σ_1", "Стандартное отклонение выборки 1"), 1, min = 0.0001))
-    #   ),
-    #   fluidRow(
-    #     column(4, numericInput("mu_1", create_tooltip("μ_2", "Cреднее выборки 2"), 0)),
-    #     column(4, numericInput("sigma", create_tooltip("σ_2", "Стандартное отклонение выборки 2"), 1, min = 0.0001))
-    #   )
-    # ),
-    
+    # ============================================
+    # CONTINGENCY TABLES
+    # ============================================
     conditionalPanel(
-      "input.test_type == 'mann_whitney'",
-      selectInput(
-        "dist_type", "Тип распределения",
-        choices = c(
-          "Нормальное N(μ, σ²)" = "normal",
-          # "Равномерное U(a, b)" = "unif",
-          "Экспоненциальное Exp(λ)" = "exponential"
-        )
+      condition = "input.test_type == 'contingency_tables'",
+      selectInput('test_method', 'Метод теста',
+                  choices = c('Хи-квадрат Пирсона' = 'chi',
+                              'Точный тест Фишера' = 'fisher')
       ),
-      fluidRow(
-        column(4, numericInput("mu1", create_tooltip("μ_1", "Cреднее выборки 1"), 0)),
-        column(4, numericInput("sigma1", create_tooltip("σ_1", "Стандартное отклонение выборки 1"), 1, min = 0.0001))
+      
+      conditionalPanel(
+        condition = "input.test_method == 'chi'",
+        checkboxInput('chi_correction', 
+                      "Поправка Йейтса на непрерывность",
+                      value = FALSE)
       ),
-      fluidRow(
-        column(4, numericInput("mu2", create_tooltip("μ_2", "Cреднее выборки 2"), 0)),
-        column(4, numericInput("sigma2", create_tooltip("σ_2", "Стандартное отклонение выборки 2"), 1, min = 0.0001))
+      
+      selectInput('trial_type', 'Тип исследования',
+                  choices = c('Когортное исследование' = 'cohort',
+                              'Исследование случаев и контролей' = 'case_control',
+                              'Перекрёстное исследование' = 'cross_sectional',
+                              'Фишер' = 'fisher')
+      ),
+      
+      # Cohort study parameters
+      conditionalPanel(
+        condition = "input.trial_type == 'cohort'",
+        numericInput("event_probability", "Вероятность события (p_event)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        numericInput("exposure_proportion", "Доля экспонированных (prop_exposure)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01)
+      ),
+      
+      # Case-control study parameters
+      conditionalPanel(
+        condition = "input.trial_type == 'case_control'",
+        numericInput("exposure_probability", "Вероятность экспозиции (p_exposure)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        numericInput("event_proportion", "Доля случаев (prop_event)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01)
+      ),
+      
+      # Cross-sectional study parameters
+      conditionalPanel(
+        condition = "input.trial_type == 'cross_sectional'",
+        numericInput("event_probability", "Вероятность события (p_event)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        numericInput("exposure_probability", "Вероятность экспозиции (p_exposure)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01)
+      ),
+      
+      # Fisher exact test parameters
+      conditionalPanel(
+        condition = "input.trial_type == 'fisher'",
+        numericInput("event_proportion", "Доля случаев (prop_event)", 
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        numericInput("exposure_proportion", "Доля экспонированных (prop_exposure)",
+                     value = 0.5, min = 0, max = 1, step = 0.01)
       )
     ),
+    
+    # ============================================
+    # MANN-WHITNEY
+    # ============================================
     conditionalPanel(
-      "input.test_type == 'brunner_munzel'",
+      condition = "input.test_type == 'mann_whitney'",
       selectInput(
-        "dist_type", "Тип распределения",
+        "dist_type_sim", "Тип распределения",
         choices = c(
           "Нормальное N(μ, σ²)" = "normal",
-          # "Равномерное U(a, b)" = "unif",
           "Экспоненциальное Exp(λ)" = "exponential"
         )
       ),
+      h5("Выборка 1", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(4, numericInput("mu1", create_tooltip("μ_1", "Cреднее выборки 1"), 0)),
-        column(4, numericInput("sigma1", create_tooltip("σ_1", "Стандартное отклонение выборки 1"), 1, min = 0.0001))
+        column(6, numericInput("mu1", "μ₁", value = 20)),
+        column(6, numericInput("sigma1", "σ₁", value = 2, min = 0.0001))
       ),
+      h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(4, numericInput("mu2", create_tooltip("μ_2", "Cреднее выборки 2"), 0)),
-        column(4, numericInput("sigma2", create_tooltip("σ_2", "Стандартное отклонение выборки 2"), 1, min = 0.0001))
+        column(6, numericInput("mu2", "μ₂", value = 20)),
+        column(6, numericInput("sigma2", "σ₂", value = 2, min = 0.0001))
       )
+    ),
+    
+    # ============================================
+    # BRUNNER-MUNZEL
+    # ============================================
+    conditionalPanel(
+      condition = "input.test_type == 'brunner_munzel'",
+      selectInput(
+        "dist_type_sim", "Тип распределения",
+        choices = c(
+          "Нормальное N(μ, σ²)" = "normal",
+          "Экспоненциальное Exp(λ)" = "exponential"
+        )
+      ),
+      h5("Выборка 1", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
+      fluidRow(
+        column(6, numericInput("mu1", "μ₁", value = 0)),
+        column(6, numericInput("sigma1", "σ₁", value = 1, min = 0.0001))
+      ),
+      h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
+      fluidRow(
+        column(6, numericInput("mu2", "μ₂", value = 0)),
+        column(6, numericInput("sigma2", "σ₂", value = 1, min = 0.0001))
+      )
+    ),
+    
+    # ============================================
+    # PARAMETER SELECTION (common for all tests)
+    # ============================================
+    h4("Параметры симуляции", style = "margin-top: 15px;"),
+    
+    selectInput(
+      "parameter_name", "Изменяемый параметр",
+      choices = c("Размер выборки N" = "sample_size")
     ),
     
     fluidRow(
-      column(4, numericInput("sample_size", create_tooltip("N", "Размер выборки"), 0)),
-      column(4, numericInput("n_sim", create_tooltip("#", "Количество выборок"), 0)),
-      column(4, numericInput("alpha", create_tooltip("α", "Уровень значимости (фикс. Ошибка I рода)"), 1, min = 0.0001))
-    )
+      column(4, numericInput("parameter_from", "От", value = 10, min = 2)),
+      column(4, numericInput("parameter_to", "До", value = 100, min = 2)),
+      column(4, numericInput("parameter_by", "Шаг", value = 10, min = 1))
+    ),
     
+    fluidRow(
+      column(6, numericInput("n_sim", "Число симуляций", value = 1000, min = 10)),
+      column(6, numericInput("alpha", "α (уровень значимости)", value = 0.05, min = 0.001, max = 0.999))
+    )
   )
 }

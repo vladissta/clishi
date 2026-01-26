@@ -30,7 +30,14 @@ create_sidebar_footer_buttons <- function() {
     
     conditionalPanel(
       condition = "input.top_block == 'block1'",
-      actionButton("run", "Смоделировать выборки", 
+      actionButton("run_block1", "Смоделировать выборки", 
+                   class = "btn-primary btn-block"),
+      tags$div(style = "height:8px;")
+    ),
+    
+    conditionalPanel(
+      condition = "input.top_block == 'block2'",
+      actionButton("run_block2", "Смоделировать", 
                    class = "btn-primary btn-block"),
       tags$div(style = "height:8px;")
     ),

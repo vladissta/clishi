@@ -5,8 +5,12 @@ library(shiny)
 library(shinydashboard)
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(DT)
 library(shinyjs)
+library(shinycssloaders)
+
+library(furrr)
 
 # Sources ----
 source("scripts/calculations.R")
@@ -18,6 +22,14 @@ source("scripts/ui_block2.R")
 source("scripts/ui_block3.R")
 source("scripts/ui_block4.R")
 source("scripts/help_output.R")
+
+source('scripts/t_test_one_sample.R')
+source('scripts/t_test_two_sample.R')
+source('scripts/Mann-Whitney test.R')
+source('scripts/Brunner-Munzel test.R')
+source('scripts/contingency_table.R')
+
+source('scripts/simulation_wrapper.R')
 
 # Helpers ----
 DEFAULT_SEED <- 42
@@ -115,12 +127,20 @@ dashboardSidebar(
     ),
     
     # -------------------------
-    # BLOCK 2–4 placeholders
+    # BLOCK 2–4 
     # -------------------------
     conditionalPanel(
       condition = "input.top_block == 'block2'",
-      h2("Блок 2...."),
-      p("Здесь будут: one-sample t, two-sample t, Mann–Whitney, Brunner–Munzel, χ², Fisher.")
+      fluidRow(
+        box(
+          width = 12,
+          withSpinner(
+            plotOutput("parameters_grid_line_plot", height = "300px"),
+            type = 6, 
+            caption = "Симуляция в прогрессе.."
+          )
+        )
+      )
     ),
     
     conditionalPanel(
@@ -223,7 +243,7 @@ server <- function(input, output, session) {
     hypothesis_text_func(mu0 = input$mu0, alt_type = input$alt_type)
   })
   
-  samples_values_simulated <- eventReactive(input$run, {
+  samples_values_simulated <- eventReactive(input$run_block1, {
     
     validate(
       need(input$n >= 2, "Объем выборки должен быть ≥ 2"),
@@ -325,6 +345,8 @@ server <- function(input, output, session) {
   # ---------------------
   # OUTPUTS
   # ---------------------
+  
+  # BLOCK 1
   
   output$one_exp_plot <- renderPlot({
     stripchart_one_sample_plot(
@@ -436,7 +458,118 @@ server <- function(input, output, session) {
     req(input$dist_type)
     exp_plot_help(input$dist_type)
   })
+ 
+  # BLOCK 2
   
+  # observe({
+  #   print(input$test_type)
+  #   print(length(input$test_type))
+  # })
+
+  sim_args <- reactive({
+    req(input$test_type)
+    
+    switch(
+      input$test_type,
+      "t_one_sample" = list(
+        fun = t_test_one_sample,
+        distribution = input$dist_type_sim,
+        mu = input$mu,
+        sigma = input$sigma,
+        mu_0 = input$mu_0
+      ),
+      
+      "t_two_sample" = list(
+        fun = t_test_two_sample,
+        distribution = input$dist_type_sim,
+        mu1 = input$mu1,
+        sigma1 = input$sigma1,
+        mu2 = input$mu2,
+        sigma2 = input$sigma2
+      ),
+      
+      "mann_whitney" = list(
+        fun = mann_whitney,
+        distribution = input$dist_type_sim,
+        mu1 = input$mu1,
+        sigma1 = input$sigma1,
+        mu2 = input$mu2,
+        sigma2 = input$sigma2
+      ),
+      
+      "brunner_munzel" = list(
+        fun = brunner_munzel,
+        distribution = input$dist_type_sim,
+        mu1 = input$mu1,
+        sigma1 = input$sigma1,
+        mu2 = input$mu2,
+        sigma2 = input$sigma2
+      ),
+      
+      "contingency_tables" = {
+        req(input$trial_type, input$test_method)
+        
+        args <- list(
+          fun = generation_binary_experiment,
+          design = input$trial_type,
+          method = input$test_method
+        )
+        
+        if (input$trial_type == "cohort") {
+          req(input$event_probability, input$exposure_proportion)
+          args$event_probability <- input$event_probability
+          args$exposure_proportion <- input$exposure_proportion
+          
+        } else if (input$trial_type == "case_control") {
+          req(input$exposure_probability, input$event_proportion)
+          args$exposure_probability <- input$exposure_probability
+          args$event_proportion <- input$event_proportion
+          
+        } else if (input$trial_type == "cross_sectional") {
+          req(input$event_probability, input$exposure_probability)
+          args$event_probability <- input$event_probability
+          args$exposure_probability <- input$exposure_probability
+          
+        } else if (input$trial_type == "fisher") {
+          req(input$event_proportion, input$exposure_proportion)
+          args$event_proportion <- input$event_proportion
+          args$exposure_proportion <- input$exposure_proportion
+        }
+        
+        args
+      }
+    )
+  })
+  
+  
+  grid_output_values <- eventReactive(input$run_block2, {
+    # req(input$top_block == "block2")
+    req(sim_args())
+    
+    do.call(
+      simulation_wrapper,
+      c(
+        sim_args(),
+        list(
+          parameter = input$parameter_name,
+          grid = seq(input$parameter_from,
+                     input$parameter_to,
+                     by = input$parameter_by),
+          cores = input$cores,
+          seed = DEFAULT_SEED,
+          n_sim = input$n_sim,
+          alpha = input$alpha
+        )
+      )
+    )
+  })
+
+  output$parameters_grid_line_plot <- renderPlot({
+    parameters_grid_line_plot(grid_output_values(), 
+                              "BLANK", 
+                              input$alpha)
+  })
+   
 }
 
 shinyApp(ui = ui, server = server)
