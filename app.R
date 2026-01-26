@@ -11,6 +11,7 @@ library(shinyjs)
 library(shinycssloaders)
 
 library(furrr)
+library(future)
 
 # Sources ----
 source("scripts/calculations.R")

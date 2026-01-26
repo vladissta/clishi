@@ -4,7 +4,7 @@
 #' из `grid`, подставляя это значение в аргумент с именем `parameter`. Возвращает
 #' именованный числовой вектор результатов.
 #'
-#' Параллелизация выполняется через `furrr` (backend `future`).
+#' Параллелизация выполняется через `furrr` (backend `future.callr`).
 #'
 #' @param fun Функция-симулятор. Должна принимать аргумент с именем, указанным в
 #'   `parameter`, а также любые дополнительные аргументы через `...`.
@@ -23,31 +23,18 @@
 #' }
 #'
 #' @details
-#' Внутри устанавливается план `plan(multisession, workers = cores)`. Для каждого `x`
-#' из `grid` формируется список аргументов:
+#' Внутри устанавливается план `plan(future.callr::callr, workers = cores)`. 
+#' Использование `callr` обеспечивает запуск каждого воркера в отдельной чистой 
+#' сессии R, что повышает стабильность при работе в Shiny. 
+#' Для каждого `x` из `grid` формируется список аргументов:
 #' `c(setNames(list(x), parameter), list(...))`, затем выполняется `do.call(fun, args)`.
 #'
-#' Так как используется `future_map_dbl()`, функция `fun` обязана возвращать ровно одно
-#' числовое значение на каждой итерации.
-#'
-#' @seealso [furrr::future_map_dbl()], [furrr::furrr_options()], [future::plan()]
-#'
-#' @examples
-#' sim_fun <- function(mu, n = 30) mean(rnorm(n, mean = mu, sd = 1))
-#'
-#' res <- simulation_wrapper(
-#'   fun = sim_fun,
-#'   parameter = "mu",
-#'   grid = seq(-1, 1, by = 0.5),
-#'   cores = 2,
-#'   seed = 123,
-#'   n = 50
-#' )
-#' res
 #'
 #' @importFrom furrr future_map_dbl furrr_options
-#' @importFrom future plan multisession
+#' @importFrom future plan
+#' @importFrom future.callr callr
 #' @importFrom parallelly availableCores
+#' @importFrom stats setNames
 #' @export
 
 simulation_wrapper <- function(fun,
@@ -55,7 +42,7 @@ simulation_wrapper <- function(fun,
                                cores = availableCores() - 1,
                                seed, ...) {
   
-  plan(multisession, workers = cores)
+  plan(future.callr::callr, workers = cores)
   
   output_vector <-
     furrr::future_map_dbl(
