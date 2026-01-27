@@ -36,7 +36,7 @@ get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
   p_frac <- sum(result < alpha) / length(result)
   return(p_frac)
 }
-  
+
 
 cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposure_probability = 0.5) {
   data <- tibble(
@@ -49,6 +49,17 @@ cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposur
   return(cont_tables)
 }
 
+# cross_sectional_RR <- function(n_sim, sample_size, RR, basic_risk) {
+#   data <- tibble(
+#     experiment = rep(1:n_sim, each = sample_size),
+#     
+#     
+#     
+#   )
+#   
+#   cont_tables <- get_contingency_table(data)
+#   return(cont_tables)
+# }
 
 cohort <- function(n_sim, sample_size, event_probability = 0.5, exposure_proportion) {
   n_exp   <- as.integer(round(sample_size * exposure_proportion))
@@ -64,6 +75,28 @@ cohort <- function(n_sim, sample_size, event_probability = 0.5, exposure_proport
   return(cont_tables)
 }
 
+cohort_RR <- function(n_sim, sample_size, exposure_proportion = 0.5, basic_risk, RR) {
+  # (un)exposed_plus/minus <- (не)экспозированные, у которых событие произошло/не произошло
+  cont_tables <- c()
+  for (simulation_num in 1:n_sim) {
+    unexposed <- rbinom(round(sample_size * (1 - exposure_proportion)), 1, prob = basic_risk)
+    exposed = rbinom(sample_size - length(unexposed), 1, prob = min(basic_risk * RR, 1))
+    
+    unexposed_plus <- sum(unexposed)
+    unexposed_minus <- length(unexposed) - unexposed_plus
+    
+    exposed_plus <- sum(exposed)
+    exposed_minus <- length(exposed) - exposed_plus
+    
+    cont_tables[[simulation_num]] <- matrix(
+      c(unexposed_minus, unexposed_plus,
+        exposed_minus, exposed_plus),
+      nrow = 2,
+      byrow = TRUE
+    )
+  }
+  return(cont_tables)
+}
 
 case_control <- function(n_sim, sample_size, exposure_probability = 0.5, event_proportion) {
   n_case <- as.integer(round(sample_size * event_proportion)) 
@@ -121,7 +154,8 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion) {
 #' Обязательно для дизайнов \code{"case_control"} и \code{"fisher"}.
 #' @param design Строка. Тип дизайна исследования. Возможные значения:
 #' \code{"cross_sectional"} (по умолчанию), \code{"cohort"}, 
-#' \code{"case_control"}, \code{"fisher"}.
+#' \code{"case_control"}, \code{"fisher"}, \code{"cross_sectional_OR"} (кросс-
+#' секционное исследование с заданными отношением рисков и базовым риском)
 #' @param method Строка. Тип статистического теста. Возможные значения: 
 #' \code{"chi"} (хи-квадрат, по умолчанию) или \code{"fisher"} (тест Фишера).
 #' @param alpha Число от 0 до 1. Уровень значимости. По умолчанию 0.05.
@@ -148,10 +182,12 @@ fisher <- function(n_sim, sample_size, event_proportion, exposure_proportion) {
 generation_binary_experiment <- function(
     n_sim,
     sample_size,
-    event_probability = 0.5,
-    exposure_probability = 0.5,
-    exposure_proportion = 0.5,
-    event_proportion = 0.5,
+    event_probability,
+    exposure_probability,
+    RR,
+    basic_risk,
+    exposure_proportion,
+    event_proportion,
     alpha = 0.05,
     design = "cross_sectional",
     correct = FALSE,
@@ -163,20 +199,31 @@ generation_binary_experiment <- function(
   assert_choice(method, c("chi", "fisher"))
   assert_number(alpha, lower = 0.001, upper = 0.999)
   
-  if (design %in% c("cross_sectional", "case_control")) {
+  if (design == "cohort") {
+    if ((!is.null(RR) && !is.na(RR)) && (!is.null(basic_risk) && !is.na(basic_risk))) {
+      is_RR <- TRUE
+      assert_number(basic_risk, lower = 0.001, upper = 0.999)
+      assert_number(RR, lower = 0.1, upper = 10)
+    } else {
+      is_RR <- FALSE
+      assert_number(event_probability, lower = 0.001, upper = 0.999)
+    }
+    assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
+  }
+  
+  if (design %in% c("case_control", "cross_sectional")) {
     assert_number(event_probability, lower = 0.001, upper = 0.999)
   }
-  if (design %in% c("cross_sectional", "cohort")) {
+  if (design %in% c("cross_sectional")) {
     assert_number(exposure_probability, lower = 0.001, upper = 0.999)
   }
   if (design %in% c("case_control", "fisher")) {
     assert_number(event_proportion, lower = 0.001, upper = 0.999)
   }
-  if (design %in% c("cohort", "fisher")) {
+  if (design %in% c("fisher")) {
     assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
-  }
- 
-
+  } 
+  
   cont_tables <- switch(
     match.arg(design, c("cross_sectional", "cohort", "case_control", "fisher")),
     "cross_sectional" = cross_sectional(
@@ -186,13 +233,22 @@ generation_binary_experiment <- function(
       exposure_probability = exposure_probability
     ),
     
-    "cohort" = cohort(
-      n_sim = n_sim,
-      sample_size = sample_size,
-      event_probability = event_probability,
-      exposure_proportion = exposure_proportion
-    ),
-    
+    "cohort" = if (is_RR) {
+      cohort_RR(
+        n_sim = n_sim,
+        sample_size = sample_size,
+        exposure_proportion = exposure_proportion,
+        basic_risk = basic_risk,
+        RR = RR
+      )
+    } else {
+      cohort(
+        n_sim = n_sim,
+        sample_size = sample_size,
+        event_probability = event_probability,
+        exposure_proportion = exposure_proportion
+      )
+    },
     "case_control" = case_control(
       n_sim = n_sim,
       sample_size = sample_size,

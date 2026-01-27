@@ -1,11 +1,12 @@
 # app_blocks.R ----
 
 # Packages ----
-library(shiny)
-library(shinydashboard)
 library(ggplot2)
 library(dplyr)
 library(tidyr)
+
+library(shiny)
+library(shinydashboard)
 library(DT)
 library(shinyjs)
 library(shinycssloaders)
