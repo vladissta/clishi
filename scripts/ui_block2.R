@@ -96,10 +96,27 @@ sidebar_block2_tests_inputs <- function() {
       # Cohort study parameters
       conditionalPanel(
         condition = "input.trial_type == 'cohort'",
-        numericInput("event_probability", "Вероятность события (p_event)", 
-                     value = 0.5, min = 0, max = 1, step = 0.01),
         numericInput("exposure_proportion", "Доля экспонированных (prop_exposure)", 
-                     value = 0.5, min = 0, max = 1, step = 0.01)
+                     value = 0.5, min = 0, max = 1, step = 0.01),
+        radioButtons("cohort_method", "Способ задания параметров:",
+                     choices = c("Через вероятность события" = "prob_mode",
+                                 "Через отношение рисков (RR)" = "rr_mode")),
+        
+        conditionalPanel(
+          condition = "input.cohort_method == 'prob_mode'",
+          numericInput("event_probability", "Вероятность события (p_event)", 
+                       value = 0.5, min = 0, max = 1, step = 0.01),
+          helpText("Расчет на основе фиксированной вероятности события")
+        ),
+        
+        conditionalPanel(
+          condition = "input.cohort_method == 'rr_mode'",
+          numericInput("basic_risk", "Базовый риск", 
+                       value = NULL, min = 0, max = 1, step = 0.01),
+          numericInput("RR", "Отношение рисков (RR)", 
+                       value = 1.5, min = 0, max = 10, step = 0.01),
+          helpText("Вероятность в группе воздействия будет рассчитана как базовый риск * RR")
+        )
       ),
       
       # Case-control study parameters
@@ -249,10 +266,21 @@ create_simulation_args <- function(input){
       )
       
       if (input$trial_type == "cohort") {
-        req(input$event_probability, input$exposure_proportion)
-        args$event_probability <- input$event_probability
+        req(input$exposure_proportion)
         args$exposure_proportion <- input$exposure_proportion
-        
+        if (input$cohort_method == 'rr_mode') {
+          # Отношение рисков, rr_mode
+          req(input$RR, input$basic_risk)
+          args$RR <- input$RR
+          args$basic_risk <- input$basic_risk
+          args$event_probability <- NULL 
+        } else {
+          # Вероятность события, prob_mode
+          req(input$event_probability)
+          args$event_probability <- input$event_probability
+          args$RR <- NULL
+          args$basic_risk <- NULL
+        }
       } else if (input$trial_type == "case_control") {
         req(input$exposure_probability, input$event_proportion)
         args$exposure_probability <- input$exposure_probability
