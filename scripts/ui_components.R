@@ -43,6 +43,13 @@ create_sidebar_footer_buttons <- function() {
     ),
     
     conditionalPanel(
+      condition = "input.top_block == 'block3'",
+      actionButton("run_block3", "Рассчитать выборку", 
+                   class = "btn-primary btn-block"),
+      tags$div(style = "height:8px;")
+    ),
+    
+    conditionalPanel(
       condition = "input.top_block && input.top_block != 'home'",
       actionButton("go_home", "\u2190 Назад к выбору блоков", 
                    class = "btn-default btn-block")

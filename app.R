@@ -32,9 +32,6 @@ source('scripts/contingency_table.R')
 
 source('scripts/simulation_wrapper.R')
 
-# Helpers ----
-DEFAULT_SEED <- 42
-
 # UI ----
 ui <- dashboardPage(
   skin = "blue",
@@ -107,29 +104,25 @@ dashboardSidebar(
       tabPanel("block4", value = "block4")
     ),
     
-    # Логотип показываем ТОЛЬКО внутри блоков (НЕ home)
+    ## Логотип ----
+    # показываем ТОЛЬКО внутри блоков (НЕ home)
     conditionalPanel(
       condition = "input.top_block && input.top_block != 'home'",
       create_fixed_logo()), # <---
     
-    # HOME (выбор блоков) — кликабельные карточки 
+    ## HOME (выбор блоков) — кликабельные карточки ----
     conditionalPanel(
       condition = "input.top_block == 'home' || !input.top_block",
       create_home_page() # <---
     ),
     
-    # -------------------------
-    # BLOCK 1 (контент переключается по input$block1_subtab)
-    # -------------------------
-    
+    ## Block 1 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block1'",
       create_block1_content() # <---
     ),
     
-    # -------------------------
-    # BLOCK 2–4 
-    # -------------------------
+    ## Block 2 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block2'",
       fluidRow(
@@ -144,12 +137,25 @@ dashboardSidebar(
       )
     ),
     
+    ## Block 3 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block3'",
-      h2("Блок 3... Расчет выборки классическими методами"),
-      p("Сюда добавим классические формулы.")
+      h3("Результаты расчета выборки"),
+      br(),
+      verbatimTextOutput("result_sample_size_calc"),
+      br(),
+      h4("Инструкция по использованию:"),
+      tags$ol(
+        tags$li("Выберите тип данных (количественные или качественные)"),
+        tags$li("Выберите тип исследования (превосходство или не меньшая эффективность)"),
+        tags$li("Задайте параметры alpha и beta (обычно 0.05 и 0.2)"),
+        tags$li("Задайте параметр k - соотношение между группой терапии и контроля"),
+        tags$li("Заполните специфичные параметры для выбранного типа данных"),
+        tags$li("Нажмите кнопку 'Рассчитать объем выборки'")
+      )
     ),
     
+    ## Block 4 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block4'",
       h2("Блок 4...."),
@@ -161,7 +167,7 @@ dashboardSidebar(
 # SERVER ----
 server <- function(input, output, session) {
   
-  # Re-init tooltips after every UI flush (важно для dynamic UI)
+  ## Top block ----
   session$onFlushed(function() {
     shinyjs::runjs("$('[data-toggle=\"tooltip\"]').tooltip({container:'body'});")
   }, once = FALSE)
@@ -183,40 +189,50 @@ server <- function(input, output, session) {
     updateTabsetPanel(session, "top_block", selected = "block4")
   })
 
-  # --- Назад на главную ---
   observeEvent(input$go_home, {
     updateTabsetPanel(session, "top_block", selected = "home")
   })
   
   
-  # Sidebar
+# SIDEBAR ----
   output$sidebar_inputs <- renderUI({
+    
     req(input$top_block)
     
     switch(input$top_block,
+           
            "block1" = tagList(
+             numericInput('seed',
+                          create_tooltip("Seed", "Seed для генератора случайных чисел"), 
+                          value = 42, min = 1, step = 1),
              sidebar_block1_dist_inputs(),
              sidebar_block1_sample_inputs(),
              sidebar_block1_hypothesis_inputs(),
              sidebar_block1_test_inputs()
            ),
+           
            "block2" = tagList(
+             numericInput('seed',
+                          create_tooltip("Seed", "Seed для генератора случайных чисел"), 
+                          value = 42, min = 1, step = 1),
+             sidebar_block2_cores_input(),
              sidebar_block2_tests_inputs()
-             # sidebar_block2_yyy()
            ),
+           
            "block3" = tagList(
-             # sidebar_block3_xxx()
+             sidebar_block3_sample_size_calc_input()
            ),
+           
            "block4" = tagList(
              # sidebar_block4_xxx()
            ),
-           NULL  # default case (home or other)
+           NULL
     )
   })
   
-  # -----------------------------
-  # Block 1 logic (твоя логика)
-  # -----------------------------
+
+# BLOCK 1 Server----
+  
   params_list <- reactive({
     list(
       norm_mean = input$norm_mean,
@@ -244,6 +260,10 @@ server <- function(input, output, session) {
     hypothesis_text_func(mu0 = input$mu0, alt_type = input$alt_type)
   })
   
+  observeEvent(input$seed, {
+    set.seed(input$seed)
+  })
+  
   samples_values_simulated <- eventReactive(input$run_block1, {
     
     validate(
@@ -254,8 +274,6 @@ server <- function(input, output, session) {
     if (isTRUE(input$use_true_mu)) {
       updateNumericInput(session, "mu0", value = true_mu())
     }
-    
-    set.seed(DEFAULT_SEED)
     
     samples_values_simulated_calc(
       n = input$n,
@@ -342,12 +360,6 @@ server <- function(input, output, session) {
       silent = TRUE
     )
   })
-  
-  # ---------------------
-  # OUTPUTS
-  # ---------------------
-  
-  # BLOCK 1
   
   output$one_exp_plot <- renderPlot({
     stripchart_one_sample_plot(
@@ -460,7 +472,7 @@ server <- function(input, output, session) {
     exp_plot_help(input$dist_type)
   })
  
-  # BLOCK 2
+  # BLOCK 2 Server----
   
   # observe({
   #   print(input$test_type)
@@ -469,77 +481,7 @@ server <- function(input, output, session) {
 
   sim_args <- reactive({
     req(input$test_type)
-    
-    switch(
-      input$test_type,
-      "t_one_sample" = list(
-        fun = t_test_one_sample,
-        distribution = input$dist_type_sim,
-        mu = input$mu,
-        sigma = input$sigma,
-        mu_0 = input$mu_0
-      ),
-      
-      "t_two_sample" = list(
-        fun = t_test_two_sample,
-        distribution = input$dist_type_sim,
-        mu1 = input$mu1,
-        sigma1 = input$sigma1,
-        mu2 = input$mu2,
-        sigma2 = input$sigma2
-      ),
-      
-      "mann_whitney" = list(
-        fun = mann_whitney,
-        distribution = input$dist_type_sim,
-        mu1 = input$mu1,
-        sigma1 = input$sigma1,
-        mu2 = input$mu2,
-        sigma2 = input$sigma2
-      ),
-      
-      "brunner_munzel" = list(
-        fun = brunner_munzel,
-        distribution = input$dist_type_sim,
-        mu1 = input$mu1,
-        sigma1 = input$sigma1,
-        mu2 = input$mu2,
-        sigma2 = input$sigma2
-      ),
-      
-      "contingency_tables" = {
-        req(input$trial_type, input$test_method)
-        
-        args <- list(
-          fun = generation_binary_experiment,
-          design = input$trial_type,
-          method = input$test_method
-        )
-        
-        if (input$trial_type == "cohort") {
-          req(input$event_probability, input$exposure_proportion)
-          args$event_probability <- input$event_probability
-          args$exposure_proportion <- input$exposure_proportion
-          
-        } else if (input$trial_type == "case_control") {
-          req(input$exposure_probability, input$event_proportion)
-          args$exposure_probability <- input$exposure_probability
-          args$event_proportion <- input$event_proportion
-          
-        } else if (input$trial_type == "cross_sectional") {
-          req(input$event_probability, input$exposure_probability)
-          args$event_probability <- input$event_probability
-          args$exposure_probability <- input$exposure_probability
-          
-        } else if (input$trial_type == "fisher") {
-          req(input$event_proportion, input$exposure_proportion)
-          args$event_proportion <- input$event_proportion
-          args$exposure_proportion <- input$exposure_proportion
-        }
-        
-        args
-      }
-    )
+    create_simulation_args(input)
   })
   
   
@@ -557,7 +499,7 @@ server <- function(input, output, session) {
                      input$parameter_to,
                      by = input$parameter_by),
           cores = input$cores,
-          seed = DEFAULT_SEED,
+          seed = input$seed,
           n_sim = input$n_sim,
           alpha = input$alpha
         )
@@ -570,7 +512,157 @@ server <- function(input, output, session) {
                               "BLANK", 
                               input$alpha)
   })
+  
+
+  # BLOCK 2 Server ----
+  
+  # Динамические элементы ввода
+  output$dynamic_inputs <- renderUI({
+    if (input$data_type == "proportion") {
+      # Параметры для пропорций
+      tagList(
+        numericInput(
+          "p1",
+          "Пропорция в группе терапии p1:",
+          value = 0.2,
+          min = 0.001,
+          max = 0.999,
+          step = 0.01
+        ),
+        
+        numericInput(
+          "p2",
+          "Пропорция в группе контроля p2:",
+          value = 0.2,
+          min = 0.001,
+          max = 0.999,
+          step = 0.01
+        ),
+        
+        numericInput(
+          "margin",
+          HTML("Граница превосходства/не меньшей эффективности (margin):"),
+          value = ifelse(input$hypothesis == "superiority", 0.1, -0.1),
+          step = 0.01
+        ),
+        
+        helpText(HTML("Ho: p1−p2≤margin Ha: p1-p2 > margin"))
+      )
+    } else {
+      # Параметры для количественных
+      tagList(
+        numericInput(
+          "mu1",
+          "Среднее в группе терапии (μ1):",
+          value = 10.0,
+          step = 0.1
+        ),
+        
+        numericInput(
+          "mu2",
+          "Среднее в группе контроля (μ2):",
+          value = 10.0,
+          step = 0.1
+        ),
+        
+        numericInput(
+          "sigma",
+          "Объединенное стандартное отклонение (σ):",
+          value = 2.0,
+          min = 0.01,
+          step = 0.1
+        ),
+        
+        numericInput(
+          "delta1",
+          HTML("Граница превосходства/не меньшей эффективности (delta):"),
+          value = 2.0,
+          step = 0.1
+        ),
+        
+        helpText(HTML("Ho: margin≤delta Ha: margin > delta"))
+      )
+    }
+  })
+  
+  observeEvent(input$run_block3, {
+    
+    result <- tryCatch({
+      if (input$data_type == "proportion") {
+        delta <- input$p1 - input$p2
+        res <- TwoSampleProportion.NIS(
+          alpha = input$alpha,
+          beta = input$beta,
+          p1 = input$p1,
+          p2 = input$p2,
+          k = input$k,
+          delta = delta,
+          margin = input$margin
+        )
+        
+        n1 <- ceiling(res[1])
+        n2 <- ceiling(res[1]/input$k)
+        total_end <- ceiling(n1 + n2) 
+        total_study <- ceiling(ceiling(n1 / 0.8) / 0.9) + ceiling(ceiling(n2 / 0.8) / 0.9)
+        
+        list(
+          n1 = n1, 
+          n2 = n2, 
+          difference = delta, 
+          diff_name = "delta = p1 - p2",
+          total_end = total_end, 
+          total_study = total_study
+        )
+        
+      } else if (input$data_type == "mean") {
+        margin1 <- input$mu1 - input$mu2
+        res <- TwoSampleMean.NIS(
+          alpha = input$alpha,
+          beta = input$beta,
+          sigma = input$sigma,
+          k = input$k,
+          delta = input$delta1,
+          margin = margin1
+        )
+        
+        n1 <- ceiling(res[1])
+        n2 <- ceiling(res[1]/input$k)
+        total_end <- ceiling(n1 + n2) 
+        total_study <- ceiling(ceiling(n1 / 0.8) / 0.9) + ceiling(ceiling(n2 / 0.8) / 0.9)
+        
+        list(
+          n1 = n1, 
+          n2 = n2, 
+          difference = margin1, 
+          diff_name = "margin = μ1 - μ2",
+          total_end = total_end, 
+          total_study = total_study
+        )
+      }
+    }, error = function(e) {
+      return(list(error = e$message))
+    })
+    
+    if (!is.null(result$error)) {
+      output$result_sample_size_calc <- renderText({
+        paste("Ошибка:", result$error)
+      })
+      return()
+    }
+    
+    output$result_sample_size_calc <- renderText({
+      paste(
+        result$diff_name, " = ", round(result$difference, 3), "\n",
+        "Группа терапии (n1): ", result$n1, "\n",
+        "Группа контроля (n2): ", result$n2, "\n",
+        "Общий объем выборки: ", result$total_end, "\n",
+        "Объем выборки с учетом выбывших во время исследования (20%) и с учетом выбывших во время скрининга (10%): ", result$total_study
+      )
+    })
+  })
    
 }
+
+# BLOCK \d Server----
 
 shinyApp(ui = ui, server = server)

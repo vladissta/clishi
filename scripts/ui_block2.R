@@ -4,15 +4,17 @@ create_block2_tabs <- function() {
   
 }
 
-sidebar_block2_tests_inputs <- function() {
-  
-  tagList(
+sidebar_block2_cores_input <- function() {
     numericInput("cores", "Число ядер для симуляции", 
                  value = 4, 
                  min = 1, 
                  max = availableCores(), 
-                 step = 1),
-    
+                 step = 1)
+}
+
+sidebar_block2_tests_inputs <- function() {
+  
+  tagList(
     h4("Выбор теста"),
     selectInput(
       "test_type", "Статистический тест",
@@ -24,7 +26,6 @@ sidebar_block2_tests_inputs <- function() {
         "Brunner-Munzel тест" = "brunner_munzel"
       )
     ),
-    
     # ============================================
     # T-ONE-SAMPLE
     # ============================================
@@ -87,7 +88,7 @@ sidebar_block2_tests_inputs <- function() {
       
       selectInput('trial_type', 'Тип исследования',
                   choices = c('Когортное исследование' = 'cohort',
-                              'Исследование случаев и контролей' = 'case_control',
+                              'Исследование случай-контроль' = 'case_control',
                               'Перекрёстное исследование' = 'cross_sectional',
                               'Фишер' = 'fisher')
       ),
@@ -143,13 +144,13 @@ sidebar_block2_tests_inputs <- function() {
       ),
       h5("Выборка 1", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu1", "μ₁", value = 20)),
-        column(6, numericInput("sigma1", "σ₁", value = 2, min = 0.0001))
+        column(6, numericInput("mu1", create_tooltip("μ₁", "Среднее первой выборки"), value = 20)),
+        column(6, numericInput("sigma1", create_tooltip("σ₁", "Стандартное отклонение первой выборки"), value = 2, min = 0.0001))
       ),
       h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu2", "μ₂", value = 20)),
-        column(6, numericInput("sigma2", "σ₂", value = 2, min = 0.0001))
+        column(6, numericInput("mu2", create_tooltip("μ₁", "Среднее второй выборки"), value = 20)),
+        column(6, numericInput("sigma2", create_tooltip("σ₁", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
       )
     ),
     
@@ -167,13 +168,13 @@ sidebar_block2_tests_inputs <- function() {
       ),
       h5("Выборка 1", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu1", "μ₁", value = 0)),
-        column(6, numericInput("sigma1", "σ₁", value = 1, min = 0.0001))
+        column(6, numericInput("mu1", create_tooltip("μ₁", "Среднее первой выборки"), value = 20)),
+        column(6, numericInput("sigma1", create_tooltip("σ₁", "Стандартное отклонение первой выборки"), value = 2, min = 0.0001))
       ),
       h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu2", "μ₂", value = 0)),
-        column(6, numericInput("sigma2", "σ₂", value = 1, min = 0.0001))
+        column(6, numericInput("mu2", create_tooltip("μ₁", "Среднее второй выборки"), value = 20)),
+        column(6, numericInput("sigma2", create_tooltip("σ₁", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
       )
     ),
     
@@ -197,5 +198,78 @@ sidebar_block2_tests_inputs <- function() {
       column(6, numericInput("n_sim", "Число симуляций", value = 1000, min = 10)),
       column(6, numericInput("alpha", "α (уровень значимости)", value = 0.05, min = 0.001, max = 0.999))
     )
+  )
+}
+
+create_simulation_args <- function(input){
+  switch(
+    input$test_type,
+    "t_one_sample" = list(
+      fun = t_test_one_sample,
+      distribution = input$dist_type_sim,
+      mu = input$mu,
+      sigma = input$sigma,
+      mu_0 = input$mu_0
+    ),
+    
+    "t_two_sample" = list(
+      fun = t_test_two_sample,
+      distribution = input$dist_type_sim,
+      mu1 = input$mu1,
+      sigma1 = input$sigma1,
+      mu2 = input$mu2,
+      sigma2 = input$sigma2
+    ),
+    
+    "mann_whitney" = list(
+      fun = mann_whitney,
+      distribution = input$dist_type_sim,
+      mu1 = input$mu1,
+      sigma1 = input$sigma1,
+      mu2 = input$mu2,
+      sigma2 = input$sigma2
+    ),
+    
+    "brunner_munzel" = list(
+      fun = brunner_munzel,
+      distribution = input$dist_type_sim,
+      mu1 = input$mu1,
+      sigma1 = input$sigma1,
+      mu2 = input$mu2,
+      sigma2 = input$sigma2
+    ),
+    
+    "contingency_tables" = {
+      req(input$trial_type, input$test_method)
+      
+      args <- list(
+        fun = generation_binary_experiment,
+        design = input$trial_type,
+        method = input$test_method
+      )
+      
+      if (input$trial_type == "cohort") {
+        req(input$event_probability, input$exposure_proportion)
+        args$event_probability <- input$event_probability
+        args$exposure_proportion <- input$exposure_proportion
+        
+      } else if (input$trial_type == "case_control") {
+        req(input$exposure_probability, input$event_proportion)
+        args$exposure_probability <- input$exposure_probability
+        args$event_proportion <- input$event_proportion
+        
+      } else if (input$trial_type == "cross_sectional") {
+        req(input$event_probability, input$exposure_probability)
+        args$event_probability <- input$event_probability
+        args$exposure_probability <- input$exposure_probability
+        
+      } else if (input$trial_type == "fisher") {
+        req(input$event_proportion, input$exposure_proportion)
+        args$event_proportion <- input$event_proportion
+        args$exposure_proportion <- input$exposure_proportion
+      }
+      
+      args
+    }
   )
 }
