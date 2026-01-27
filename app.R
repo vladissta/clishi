@@ -137,7 +137,7 @@ dashboardSidebar(
           withSpinner(
             plotOutput("parameters_grid_line_plot", height = "300px"),
             type = 6, 
-            caption = "Симуляция в прогрессе.."
+            caption = "Симуляция в процессе.."
           )
         )
       )
@@ -218,11 +218,9 @@ server <- function(input, output, session) {
            ),
            
            "block2" = tagList(
-             numericInput('seed',
-                          create_tooltip("Seed", "Seed для генератора случайных чисел"), 
-                          value = 42, min = 1, step = 1),
-             sidebar_block2_cores_input(),
-             sidebar_block2_tests_inputs()
+             sidebar_block2_seed_cores_input(),
+             sidebar_block2_tests_inputs(),
+             sidebar_parameter_selection()
            ),
            
            "block3" = tagList(
@@ -482,7 +480,7 @@ server <- function(input, output, session) {
 
   sim_args <- reactive({
     req(input$test_type)
-    create_simulation_args(input)
+    create_simulation_args(input, parameter_name = input$parameter_name)
   })
   
   grid_output_values <- eventReactive(input$run_block2, {

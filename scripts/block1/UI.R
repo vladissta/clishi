@@ -1,3 +1,5 @@
+source('scripts/ui_components.R')
+
 create_block1_tabs <- function() {
   tags$div(
     class = "clishi-top-tabs",

@@ -1,6 +1,8 @@
-create_simulation_args <- function(input){
-  switch(
+create_simulation_args <- function(input, parameter_name = NULL) {
+  
+  args <- switch(
     input$test_type,
+    
     "t_one_sample" = list(
       fun = t_test_one_sample,
       distribution = input$dist_type_sim,
@@ -69,4 +71,10 @@ create_simulation_args <- function(input){
       args
     }
   )
+  
+  if (!is.null(parameter_name) && parameter_name %in% names(args)) {
+    args[[parameter_name]] <- NULL
+  }
+  
+  args
 }

@@ -184,3 +184,9 @@
 .clishi-card-click:hover{
   border-color: rgba(60,141,188,0.5);
 }
+
+
+.tooltip { 
+  z-index: 99999 !important; 
+  
+}

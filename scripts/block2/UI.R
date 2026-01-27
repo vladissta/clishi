@@ -1,13 +1,21 @@
+source('scripts/ui_components.R')
+
 create_block2_tabs <- function() {
   
 }
 
-sidebar_block2_cores_input <- function() {
-  numericInput("cores", "Число ядер для симуляции", 
-               value = 4, 
-               min = 1, 
-               max = availableCores(), 
-               step = 1)
+sidebar_block2_seed_cores_input <- function() {
+  
+  fluidRow(column(6, numericInput("cores", 
+                                  create_tooltip("Число ядер",
+                                                 "Число ядер (CPU) для параллельной симуляции"),
+                               value = 1, 
+                               min = 1,
+                               max = availableCores()-1, 
+                               step = 1)), 
+           column(6, numericInput('seed',
+                               create_tooltip("Seed", "Seed для генератора случайных чисел"), 
+                               value = 42, min = 1, step = 1),))
 }
 
 sidebar_block2_tests_inputs <- function() {
@@ -174,22 +182,85 @@ sidebar_block2_tests_inputs <- function() {
         column(6, numericInput("mu2", create_tooltip("μ₁", "Среднее второй выборки"), value = 20)),
         column(6, numericInput("sigma2", create_tooltip("σ₁", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
       )
-    ),
+    ))}
+
+# ============================================
+# PARAMETER SELECTION 
+# ============================================
     
-    # ============================================
-    # PARAMETER SELECTION (common for all tests)
-    # ============================================
+sidebar_parameter_selection <- function() {
+  tagList(
     h4("Параметры симуляции", style = "margin-top: 15px;"),
     
-    selectInput(
-      "parameter_name", "Изменяемый параметр",
-      choices = c("Размер выборки N" = "sample_size")
+    # For t_one_sample
+    conditionalPanel(
+      condition = "input.test_type == 't_one_sample'",
+      selectInput(
+        "parameter_name", "Изменяемый параметр",
+        choices = c("Размер выборки N" = "sample_size",
+                    "Стандартное отклонение выборки" = "sigma")
+      )
     ),
     
-    fluidRow(
-      column(4, numericInput("parameter_from", "От", value = 10, min = 2)),
-      column(4, numericInput("parameter_to", "До", value = 100, min = 2)),
-      column(4, numericInput("parameter_by", "Шаг", value = 10, min = 1))
+    # For t_two_sample
+    conditionalPanel(
+      condition = "input.test_type == 't_two_sample'",
+      selectInput(
+        "parameter_name", "Изменяемый параметр",
+        choices = c("Размер выборки N" = "sample_size",
+                    "Стандартное отклонение выборки 1" = "sigma1",
+                    "Стандартное отклонение выборки 2" = "sigma2")
+      )
+    ),
+    
+    # For mann_whitney
+    conditionalPanel(
+      condition = "input.test_type == 'mann_whitney'",
+      selectInput(
+        "parameter_name", "Изменяемый параметр",
+        choices = c("Размер выборки N" = "sample_size",
+                    "Стандартное отклонение выборки 1" = "sigma1",
+                    "Стандартное отклонение выборки 2" = "sigma2")
+      )
+    ),
+    
+    # For brunner_munzel
+    conditionalPanel(
+      condition = "input.test_type == 'brunner_munzel'",
+      selectInput(
+        "parameter_name", "Изменяемый параметр",
+        choices = c("Размер выборки N" = "sample_size",
+                    "Стандартное отклонение выборки 1" = "sigma1",
+                    "Стандартное отклонение выборки 2" = "sigma2")
+      )
+    ),
+    
+    # For contingency_tables
+    conditionalPanel(
+      condition = "input.test_type == 'contingency_tables'",
+      selectInput(
+        "parameter_name", "Изменяемый параметр",
+        choices = c("Размер выборки N" = "sample_size")
+      )
+    ),
+    
+    # Common inputs (shown for all test types)
+    conditionalPanel(
+      "input.parameter_name.startsWith('sigma')",
+      fluidRow(
+        column(6, numericInput("parameter_from", "От", value = 1, min = 0.01)),
+        column(6, numericInput("parameter_to", "До", value = 10, min = 0.01)),
+        column(6, numericInput("parameter_by", "Шаг", value = 1, min = 0.01))
+      )
+    ),
+    
+    conditionalPanel(
+      "input.parameter_name == 'sample_size'",
+      fluidRow(
+        column(6, numericInput("parameter_from", "От", value = 10, min = 1)),
+        column(6, numericInput("parameter_to", "До", value = 100, min = 2)),
+        column(6, numericInput("parameter_by", "Шаг", value = 10, min = 1))
+      )
     ),
     
     fluidRow(

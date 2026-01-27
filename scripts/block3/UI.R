@@ -1,3 +1,5 @@
+source('scripts/ui_components.R')
+
 create_block3_tabs <- function() {
   
 }
