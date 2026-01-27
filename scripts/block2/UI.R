@@ -45,8 +45,9 @@ sidebar_block2_tests_inputs <- function() {
         )
       ),
       fluidRow(
-        column(4, numericInput("mu_0", "μ₀", value = 0)),
-        column(4, numericInput("mu", "μ", value = 0)),
+        column(4, numericInput("mu_0", create_tooltip("μ₀", "Значение математического ожидания при нулевой гипотезе"), 
+                               value = 0)),
+        column(4, numericInput("mu", create_tooltip("μ", "Среднее (мат. ожидание) генеральной совокупности"), value = 0)),
         column(4, numericInput("sigma", "σ", value = 1, min = 0.0001))
       )
     ),

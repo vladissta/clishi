@@ -1,5 +1,3 @@
-# app_blocks.R ----
-
 # Packages ----
 library(ggplot2)
 library(dplyr)
@@ -13,6 +11,8 @@ library(shinycssloaders)
 
 library(furrr)
 library(future)
+
+library(TrialSize)
 
 # Sources ----
 # block1
@@ -76,7 +76,8 @@ ui <- dashboardPage(
       
     )
   ),
-  
+
+# Sidebar ----
 dashboardSidebar(
     width = 320,
     

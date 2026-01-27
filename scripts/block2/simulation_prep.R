@@ -55,13 +55,10 @@ create_simulation_args <- function(input, parameter_name = NULL) {
           req(input$RR, input$basic_risk)
           args$RR <- input$RR
           args$basic_risk <- input$basic_risk
-          args$event_probability <- NULL 
         } else {
           # Вероятность события, prob_mode
           req(input$event_probability)
           args$event_probability <- input$event_probability
-          args$RR <- NULL
-          args$basic_risk <- NULL
         }
       } else if (input$trial_type == "case_control") {
         req(input$exposure_probability, input$event_proportion)
@@ -82,7 +79,23 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       args
     }
   )
+
+  valid_params <- switch(
+    input$test_type,
+    "t_one_sample" = c("fun", "distribution", "mu", "sigma", "mu_0"),
+    "t_two_sample" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
+    "mann_whitney" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
+    "brunner_munzel" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
+    "contingency_tables" = c("fun", "design", "method", "event_probability", 
+                             "exposure_probability", "exposure_proportion", 
+                             "event_proportion", "RR", "basic_risk"),
+    character(0)
+  )
   
+  # Keep only valid parameters for this test type
+  args <- args[names(args) %in% valid_params]
+  
+  # Remove the parameter that will vary in the grid
   if (!is.null(parameter_name) && parameter_name %in% names(args)) {
     args[[parameter_name]] <- NULL
   }
