@@ -200,7 +200,7 @@ generation_binary_experiment <- function(
   assert_number(alpha, lower = 0.001, upper = 0.999)
 
   if (design == "cohort") {
-    if (!is.null(RR) && !is.null(basic_risk)) {
+    if ((!is.null(RR) && !is.na(RR)) && (!is.null(basic_risk) && !is.na(basic_risk))) {
       is_RR <- TRUE
       assert_number(basic_risk, lower = 0.001, upper = 0.999)
       assert_number(RR, lower = 0.1, upper = 10)
