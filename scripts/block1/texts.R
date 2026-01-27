@@ -1,22 +1,19 @@
-library(shiny)
-# library(shinyjs)
-
 hypothesis_text_func <- function(mu0, alt_type) {
-    req(mu0)
+  req(mu0)
   
-    alt_symbol <- switch(
-      alt_type,
-      "two.sided" = "\\neq",
-      "greater"   = ">",
-      "less"      = "<"
-    )
-    
-    withMathJax(HTML(paste0(
-      "<h4>Нулевая гипотеза:</h4>",
-      "$$H_0: \\mu = ", mu0, ".$$",
-      "<h4>Альтернативная гипотеза:</h4>",
-      "$$H_1: \\mu ", alt_symbol, " ", mu0, ".$$"
-    )))
+  alt_symbol <- switch(
+    alt_type,
+    "two.sided" = "\\neq",
+    "greater"   = ">",
+    "less"      = "<"
+  )
+  
+  withMathJax(HTML(paste0(
+    "<h4>Нулевая гипотеза:</h4>",
+    "$$H_0: \\mu = ", mu0, ".$$",
+    "<h4>Альтернативная гипотеза:</h4>",
+    "$$H_1: \\mu ", alt_symbol, " ", mu0, ".$$"
+  )))
 }
 
 one_exp_text_func <- function(df_from_sim, exp_id, alpha_test,
@@ -140,27 +137,27 @@ p_values_summary_text_func <- function(df_from_sim, alpha_test){
 }
 
 t_test_crit_text_func <- function(n, alpha, alt_type){
-    
-    # req(input$n, input$alpha, input$alt_type)
-    # req(df_from_sim())
-    
-    dfree <- n - 1
-    
-    if (alt_type == "two.sided") {
-      tcrit <- qt(1 - alpha / 2, dfree)
-      cat("Критические значения (двусторонний тест): ±", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если |t_obs| >", round(tcrit, 4), "\n")
-    } else if (alt_type == "greater") {
-      tcrit <- qt(1 - alpha, dfree)
-      cat("Критическое значение (правосторонний тест):", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если t_obs >", round(tcrit, 4), "\n")
-    } else {
-      tcrit <- qt(alpha, dfree)
-      cat("Критическое значение (левосторонний тест):", round(tcrit, 4), "\n")
-      cat("Отклоняем H₀, если t_obs <", round(tcrit, 4), "\n")
-    }
-    
-    cat("\nПримечание:\n")
-    cat("- Красная область на графике — критическая область уровня α.\n")
-    cat("- Синяя линия — наблюдаемое значение t-статистики для выбранной выборки.\n")
+  
+  # req(input$n, input$alpha, input$alt_type)
+  # req(df_from_sim())
+  
+  dfree <- n - 1
+  
+  if (alt_type == "two.sided") {
+    tcrit <- qt(1 - alpha / 2, dfree)
+    cat("Критические значения (двусторонний тест): ±", round(tcrit, 4), "\n")
+    cat("Отклоняем H₀, если |t_obs| >", round(tcrit, 4), "\n")
+  } else if (alt_type == "greater") {
+    tcrit <- qt(1 - alpha, dfree)
+    cat("Критическое значение (правосторонний тест):", round(tcrit, 4), "\n")
+    cat("Отклоняем H₀, если t_obs >", round(tcrit, 4), "\n")
+  } else {
+    tcrit <- qt(alpha, dfree)
+    cat("Критическое значение (левосторонний тест):", round(tcrit, 4), "\n")
+    cat("Отклоняем H₀, если t_obs <", round(tcrit, 4), "\n")
+  }
+  
+  cat("\nПримечание:\n")
+  cat("- Красная область на графике — критическая область уровня α.\n")
+  cat("- Синяя линия — наблюдаемое значение t-статистики для выбранной выборки.\n")
 }

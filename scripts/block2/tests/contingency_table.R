@@ -36,7 +36,7 @@ get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
   p_frac <- sum(result < alpha) / length(result)
   return(p_frac)
 }
-  
+
 
 cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposure_probability = 0.5) {
   data <- tibble(
@@ -87,7 +87,11 @@ cohort_RR <- function(n_sim, sample_size, exposure_proportion = 0.5, basic_risk,
     
     exposed_plus <- sum(exposed)
     exposed_minus <- length(exposed) - exposed_plus
+<<<<<<< HEAD:scripts/contingency_table.R
 
+=======
+    
+>>>>>>> vlad_ui:scripts/block2/tests/contingency_table.R
     cont_tables[[simulation_num]] <- matrix(
       c(unexposed_minus, unexposed_plus,
         exposed_minus, exposed_plus),
@@ -183,9 +187,15 @@ generation_binary_experiment <- function(
     n_sim,
     sample_size,
     event_probability,
+<<<<<<< HEAD:scripts/contingency_table.R
     exposure_probability = 0.5,
     RR = NULL,
     basic_risk = NULL,
+=======
+    exposure_probability,
+    RR,
+    basic_risk,
+>>>>>>> vlad_ui:scripts/block2/tests/contingency_table.R
     exposure_proportion,
     event_proportion,
     alpha = 0.05,
@@ -211,6 +221,21 @@ generation_binary_experiment <- function(
     assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
   }
   
+<<<<<<< HEAD:scripts/contingency_table.R
+=======
+  if (design == "cohort") {
+    if ((!is.null(RR) && !is.na(RR)) && (!is.null(basic_risk) && !is.na(basic_risk))) {
+      is_RR <- TRUE
+      assert_number(basic_risk, lower = 0.001, upper = 0.999)
+      assert_number(RR, lower = 0.1, upper = 10)
+    } else {
+      is_RR <- FALSE
+      assert_number(event_probability, lower = 0.001, upper = 0.999)
+    }
+    assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
+  }
+  
+>>>>>>> vlad_ui:scripts/block2/tests/contingency_table.R
   if (design %in% c("case_control", "cross_sectional")) {
     assert_number(event_probability, lower = 0.001, upper = 0.999)
   }
@@ -223,7 +248,11 @@ generation_binary_experiment <- function(
   if (design %in% c("fisher")) {
     assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
   } 
+<<<<<<< HEAD:scripts/contingency_table.R
  
+=======
+  
+>>>>>>> vlad_ui:scripts/block2/tests/contingency_table.R
   cont_tables <- switch(
     match.arg(design, c("cross_sectional", "cohort", "case_control", "fisher")),
     "cross_sectional" = cross_sectional(
@@ -234,6 +263,7 @@ generation_binary_experiment <- function(
     ),
     
     "cohort" = if (is_RR) {
+<<<<<<< HEAD:scripts/contingency_table.R
         cohort_RR(
           n_sim = n_sim,
           sample_size = sample_size,
@@ -249,6 +279,23 @@ generation_binary_experiment <- function(
           exposure_proportion = exposure_proportion
         )
       },
+=======
+      cohort_RR(
+        n_sim = n_sim,
+        sample_size = sample_size,
+        exposure_proportion = exposure_proportion,
+        basic_risk = basic_risk,
+        RR = RR
+      )
+    } else {
+      cohort(
+        n_sim = n_sim,
+        sample_size = sample_size,
+        event_probability = event_probability,
+        exposure_proportion = exposure_proportion
+      )
+    },
+>>>>>>> vlad_ui:scripts/block2/tests/contingency_table.R
     "case_control" = case_control(
       n_sim = n_sim,
       sample_size = sample_size,

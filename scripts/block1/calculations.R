@@ -21,17 +21,17 @@ true_sd_calc <- function(dist_type, params_list){
 
 samples_values_simulated_calc <-
   function(n, n_sim, dist_type, params_list){
-  req(n, n_sim, dist_type)
-
-  data.frame(
-    experiment = rep(1:n_sim, each = n),
-    value = switch(dist_type,
-                   norm = {rnorm(n*n_sim, mean = params_list$norm_mean, sd = params_list$norm_sd)},
-                   unif = {
-                     validate(need(params_list$unif_max > params_list$unif_min,
-                                   "Для равномерного распределения необходимо, чтобы b > a"))
-                     runif(n * n_sim, min = params_list$unif_min, max = params_list$unif_max)},
-                   exp = {rexp(n*n_sim, rate = params_list$exp_rate)}))
+    req(n, n_sim, dist_type)
+    
+    data.frame(
+      experiment = rep(1:n_sim, each = n),
+      value = switch(dist_type,
+                     norm = {rnorm(n*n_sim, mean = params_list$norm_mean, sd = params_list$norm_sd)},
+                     unif = {
+                       validate(need(params_list$unif_max > params_list$unif_min,
+                                     "Для равномерного распределения необходимо, чтобы b > a"))
+                       runif(n * n_sim, min = params_list$unif_min, max = params_list$unif_max)},
+                     exp = {rexp(n*n_sim, rate = params_list$exp_rate)}))
   }
 
 
@@ -55,9 +55,9 @@ simulate_fun_calc_new <-function(simulated_values_df, n, n_sim, conf_level,
       t_stat     = (means - mu0) / se) %>% 
     mutate(
       p_value    = switch(alt_type,
-                       "two.sided" = 2 * pt(-abs(t_stat), df = n - 1),
-                       "greater"   = 1 - pt(t_stat, df = n - 1),
-                       "less"      = pt(t_stat, df = n - 1)),
+                          "two.sided" = 2 * pt(-abs(t_stat), df = n - 1),
+                          "greater"   = 1 - pt(t_stat, df = n - 1),
+                          "less"      = pt(t_stat, df = n - 1)),
       covers_mu0  = (ci_low <= mu0) & (ci_high >= mu0),
       covers_true_mu = (ci_low <= true_mu) & (ci_high >= true_mu)) %>% 
     mutate(
@@ -66,7 +66,7 @@ simulate_fun_calc_new <-function(simulated_values_df, n, n_sim, conf_level,
   
   return(df)
 }
-  
+
 
 ci_table_calc <- function(df_from_sim){
   
@@ -86,4 +86,3 @@ ci_table_calc <- function(df_from_sim){
   )
   
 }
-  
