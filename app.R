@@ -13,24 +13,6 @@ library(shinycssloaders)
 library(furrr)
 library(future)
 
-# source("scripts/calculations.R")
-# source("scripts/plots.R")
-# source("scripts/texts.R")
-# source("scripts/ui_components.R")
-# source("scripts/ui_block1.R")
-# source("scripts/ui_block2.R")
-# source("scripts/ui_block3.R")
-# source("scripts/ui_block4.R")
-# source("scripts/help_output.R")
-# 
-# source('scripts/t_test_one_sample.R')
-# source('scripts/t_test_two_sample.R')
-# source('scripts/Mann-Whitney test.R')
-# source('scripts/Brunner-Munzel test.R')
-# source('scripts/contingency_table.R')
-# 
-# source('scripts/simulation_wrapper.R')
-
 # Sources ----
 # block1
 source('scripts/block1/calculations.R')
@@ -54,7 +36,7 @@ source('scripts/block3/texts.R')
 source('scripts/block3/UI.R')
 
 # block4
-# -100
+# -
 
 # UI ----
 ui <- dashboardPage(
