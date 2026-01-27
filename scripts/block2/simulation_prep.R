@@ -89,3 +89,19 @@ create_simulation_args <- function(input, parameter_name = NULL) {
   
   args
 }
+
+
+
+create_defualt_grid <- function(session, parameter_name){
+  
+  if (identical(parameter_name, "sample_size")) {
+    updateNumericInput(session, "parameter_from", value = 10,  min = 1)
+    updateNumericInput(session, "parameter_to",   value = 100, min = 2)
+    updateNumericInput(session, "parameter_by",   value = 10,  min = 1)
+  } else if (startsWith(parameter_name, "sigma")) {
+    updateNumericInput(session, "parameter_from", value = 1,  min = 0.01)
+    updateNumericInput(session, "parameter_to",   value = 10, min = 0.01)
+    updateNumericInput(session, "parameter_by",   value = 1,  min = 0.01)
+  }
+  
+}

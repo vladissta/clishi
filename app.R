@@ -518,6 +518,10 @@ server <- function(input, output, session) {
                                   input$hypothesis)
   })
   
+  observeEvent(input$parameter_name, {
+    create_defualt_grid(session, input$parameter_name)
+    })
+  
   observeEvent(input$run_block3, {
     result_sample_size_calc <- create_result_sample_size_calc(input)
     

@@ -262,23 +262,11 @@ sidebar_parameter_selection <- function() {
     ),
     
     # Common inputs (shown for all test types)
-    conditionalPanel(
-      "input.parameter_name.startsWith('sigma')",
-      fluidRow(
-        column(6, numericInput("parameter_from", "От", value = 1, min = 0.01)),
-        column(6, numericInput("parameter_to", "До", value = 10, min = 0.01)),
-        column(6, numericInput("parameter_by", "Шаг", value = 1, min = 0.01))
-      )
-    ),
-    
-    conditionalPanel(
-      "input.parameter_name == 'sample_size'",
       fluidRow(
         column(6, numericInput("parameter_from", "От", value = 10, min = 1)),
         column(6, numericInput("parameter_to", "До", value = 100, min = 2)),
         column(6, numericInput("parameter_by", "Шаг", value = 10, min = 1))
-      )
-    ),
+      ),
     
     fluidRow(
       column(6, numericInput("n_sim", "Число симуляций", value = 1000, min = 10)),
