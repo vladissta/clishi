@@ -69,7 +69,8 @@ ui <- dashboardPage(
       
       conditionalPanel(
         condition = "input.top_block == 'block4'",
-        create_block4_tabs() # <---
+        h4('Soon..')
+        # create_block4_tabs() # <---
       )
       
       

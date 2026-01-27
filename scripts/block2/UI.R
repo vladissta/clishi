@@ -285,7 +285,6 @@ sidebar_parameter_selection <- function() {
       column(6, numericInput("alpha", "α (уровень значимости)", value = 0.05, min = 0.001, max = 0.999))
     )
   )
-<<<<<<< HEAD:scripts/ui_block2.R
 }
 
 create_simulation_args <- function(input){
@@ -370,6 +369,4 @@ create_simulation_args <- function(input){
       args
     }
   )
-=======
->>>>>>> vlad_ui:scripts/block2/UI.R
 }
