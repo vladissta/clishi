@@ -48,20 +48,21 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       )
       
       if (input$trial_type == "cohort") {
-        # Check if we're using RR or not
-        if (!is.null(input$use_RR) && input$use_RR) {
-          # Using RR and basic_risk
-          req(input$basic_risk, input$RR, input$exposure_proportion)
-          args$basic_risk <- input$basic_risk
+        req(input$exposure_proportion)
+        args$exposure_proportion <- input$exposure_proportion
+        if (input$cohort_method == 'rr_mode') {
+          # Отношение рисков, rr_mode
+          req(input$RR, input$basic_risk)
           args$RR <- input$RR
-          args$exposure_proportion <- input$exposure_proportion
+          args$basic_risk <- input$basic_risk
+          args$event_probability <- NULL 
         } else {
-          # Using event_probability
-          req(input$event_probability, input$exposure_proportion)
+          # Вероятность события, prob_mode
+          req(input$event_probability)
           args$event_probability <- input$event_probability
-          args$exposure_proportion <- input$exposure_proportion
+          args$RR <- NULL
+          args$basic_risk <- NULL
         }
-        
       } else if (input$trial_type == "case_control") {
         req(input$exposure_probability, input$event_proportion)
         args$exposure_probability <- input$exposure_probability
