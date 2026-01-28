@@ -532,7 +532,7 @@ server <- function(input, output, session) {
       }
     
     output$result_sample_size_calc <- renderText({
-      sample_size_results_text(result_sample_size_calc)
+      sample_size_results_text(result_sample_size_calc, input)
     })
     
   })

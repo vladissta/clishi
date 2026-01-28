@@ -1,3 +1,5 @@
+library(TrialSize)
+
 create_result_sample_size_calc <- function(input) {
   
   tryCatch({
@@ -26,6 +28,10 @@ create_result_sample_size_calc <- function(input) {
         total_end = total_end,
         total_study = total_study
       )
+      # if (input$hypothesis == "superiority") {
+      #   border = input$margin
+      #   
+      # }
       
     } else if (input$data_type == "mean") {
       margin1 <- input$mu1 - input$mu2
