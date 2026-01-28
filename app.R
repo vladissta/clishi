@@ -26,6 +26,7 @@ source('scripts/block1/help.R')
 source('scripts/block2/simulation_prep.R')
 source('scripts/block2/simulation_wrapper.R')
 source('scripts/block2/plots.R')
+source('scripts/block2/texts.R')
 source('scripts/block2/UI.R')
 ## tests
 list.files('scripts/block2/tests', full.names = TRUE) %>% 
@@ -138,30 +139,21 @@ dashboardSidebar(
         box(
           width = 12,
           withSpinner(
-            plotOutput("parameters_grid_line_plot", height = "300px"),
+            plotOutput("parameters_grid_line_plot", 
+                       height = "500px"),
             type = 6, 
             caption = "Симуляция в процессе.."
+          ))),
+          
+          fluidRow(
+              verbatimTextOutput("parameters_grid_line_plot_note")
           )
-        )
-      )
     ),
     
     ## Block 3 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block3'",
-      h3("Результаты расчета выборки"),
-      br(),
-      verbatimTextOutput("result_sample_size_calc"),
-      br(),
-      h4("Инструкция по использованию:"),
-      tags$ol(
-        tags$li("Выберите тип данных (количественные или качественные)"),
-        tags$li("Выберите тип исследования (превосходство или не меньшая эффективность)"),
-        tags$li("Задайте параметры alpha и beta (обычно 0.05 и 0.2)"),
-        tags$li("Задайте параметр k - соотношение между группой терапии и контроля"),
-        tags$li("Заполните специфичные параметры для выбранного типа данных"),
-        tags$li("Нажмите кнопку 'Рассчитать объем выборки'")
-      )
+      create_block3_content()
     ),
     
     ## Block 4 UI ----
@@ -506,8 +498,31 @@ server <- function(input, output, session) {
 
   output$parameters_grid_line_plot <- renderPlot({
     parameters_grid_line_plot(grid_output_values(), 
-                              "BLANK", 
+                              switch(
+                                input$parameter_name,
+                                "sample_size" = "Размер выборки N",
+                                "sigma" = "Стандартное отклонение выборки",
+                                "sigma1" = "Стандартное отклонение выборки 1",
+                                "sigma2" = "Стандартное отклонение выборки 2",
+                                "mu" = "Среднее выборки",
+                                "mu1" = "Среднее выборки 1",
+                                "mu2" = "Среднее выборки 2",
+                                "mu_0" = "Среднее (H₀)",
+                                "event_probability" = "Вероятность события",
+                                "exposure_probability" = "Вероятность экспозиции",
+                                "exposure_proportion" = "Доля экспозиции",
+                                "event_proportion" = "Доля событий",
+                                "basic_risk" = "Базовый риск",
+                                "RR" = "Отношение рисков (RR)",
+                                input$parameter_name
+                              ),
                               input$alpha)
+  })
+  
+  output$parameters_grid_line_plot_note <- renderText({
+"Доля стат. значимых результатов соответствует:
+• Ошибке I рода, если H0 истинна
+• Мощности теста, если истинна альтернативная гипотеза."
   })
   
 
@@ -538,7 +553,7 @@ server <- function(input, output, session) {
     
   })
   
-  ## BLOCK 4 Server ----   
+  ## BLOCK 4 Server ---- (to do)  
   
 }
 

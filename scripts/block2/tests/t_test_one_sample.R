@@ -60,7 +60,7 @@ t_test_one_sample <- function(distribution = "normal",
   }
   
   if (distribution == "exponential") {
-    # Для экспоненциального mean > 0 (rate = 1/mean)
+    # Для экспоненциального mean > 0 (rate = 1/mean)  
     checkmate::assert_true(mu > 0, .var.name = "mu")
   }
   
