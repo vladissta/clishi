@@ -46,8 +46,10 @@ sidebar_block2_tests_inputs <- function() {
       ),
       fluidRow(
         column(4, numericInput("mu_0", create_tooltip("μ₀", "Значение математического ожидания при нулевой гипотезе"), 
-                               value = 0)),
-        column(4, numericInput("mu", create_tooltip("μ", "Среднее (мат. ожидание) генеральной совокупности"), value = 0)),
+                               value = 1)),
+        column(4, numericInput("mu", 
+                               create_tooltip("μ", "Среднее (мат. ожидание) генеральной совокупности"),
+                               value = 1)),
         column(4, numericInput("sigma", "σ", value = 1, min = 0.0001))
       )
     ),
@@ -208,6 +210,7 @@ sidebar_block2_tests_inputs <- function() {
     
 sidebar_parameter_selection <- function() {
   tagList(
+    tags$hr(),
     h4("Параметры симуляции", style = "margin-top: 15px;"),
     
     # For t_one_sample
@@ -256,9 +259,56 @@ sidebar_parameter_selection <- function() {
     # For contingency_tables
     conditionalPanel(
       condition = "input.test_type == 'contingency_tables'",
-      selectInput(
-        "parameter_name", "Изменяемый параметр",
-        choices = c("Размер выборки N" = "sample_size")
+      
+      conditionalPanel(
+        condition = "input.trial_type == 'cohort' && input.cohort_method == 'prob_mode'",
+        selectInput(
+          "parameter_name", "Изменяемый параметр",
+          choices = c("Размер выборки N" = "sample_size",
+                      "Вероятность события" = "event_probability", 
+                      "Доля экспонированных" = "exposure_proportion")
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.trial_type == 'cohort' && input.cohort_method == 'rr_mode'",
+        selectInput(
+          "parameter_name", "Изменяемый параметр",
+          choices = c("Размер выборки N" = "sample_size",
+                      "Базовый риск" = "basic_risk", 
+                      "Отношение рисков (RR)" = "RR",
+                      "Доля экспонированных" = "exposure_proportion")
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.trial_type == 'case_control'",
+        selectInput(
+          "parameter_name", "Изменяемый параметр",
+          choices = c("Размер выборки N" = "sample_size",
+                      "Вероятность экспозиции" = "exposure_probability", 
+                      "Доля случаев" = "event_proportion")
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.trial_type == 'cross_sectional'",
+        selectInput(
+          "parameter_name", "Изменяемый параметр",
+          choices = c("Размер выборки N" = "sample_size",
+                      "Вероятность события" = "event_probability", 
+                      "Вероятность экспозиции" = "exposure_probability")
+        )
+      ),
+      
+      conditionalPanel(
+        condition = "input.trial_type == 'fisher'",
+        selectInput(
+          "parameter_name", "Изменяемый параметр",
+          choices = c("Размер выборки N" = "sample_size",
+                      "Доля случаев" = "event_proportion", 
+                      "Доля экспонированных" = "exposure_proportion")
+        )
       )
     ),
     
@@ -269,9 +319,17 @@ sidebar_parameter_selection <- function() {
         column(6, numericInput("parameter_by", "Шаг", value = 10, min = 1))
       ),
     
+    tags$hr(),
     fluidRow(
-      column(6, numericInput("n_sim", "Число симуляций", value = 1000, min = 10)),
-      column(6, numericInput("alpha", "α (уровень значимости)", value = 0.05, min = 0.001, max = 0.999))
+      column(6, 
+             numericInput("n_sim", create_tooltip("Симуляций", "Число симуляций"),
+                             value = 1000, min = 10)),
+      column(6, numericInput("sample_size", 
+                             create_tooltip("N", "Размер выборок"),
+                             value=100, min=3)),
+      column(6, numericInput("alpha", 
+                             create_tooltip("α","Уровень значимости для проверки гипотезы"),
+                             value = 0.05, min = 0.001, max = 0.999))
     )
   )
 }

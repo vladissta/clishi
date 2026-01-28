@@ -20,7 +20,7 @@ create_sidebar_brand <- function() {
       class = "clishi-sidebar-brand-subtitle",
       "Interactive Clinical Research Simulator - Shiny Application"
     ),
-    tags$div(class = "clishi-sidebar-brand-version", "v 1.0 (beta)")
+    tags$div(class = "clishi-sidebar-brand-version", "v 0.2 (beta)")
   )
 }
 
@@ -80,13 +80,13 @@ create_home_page <- function() {
                         "Симуляции, распределения выборочных средних, ДИ, p-value, критические области."),
       
       create_block_card("block2", "Оценка зависимости результатов теста от величины параметра",
-                        "Сравнение тестов при изменении эффекта/параметров (планируется)."),
+                        "Сравнение тестов при изменении эффекта/параметров"),
       
       create_block_card("block3", "Расчет выборки классическими методами",
-                        "Классические формулы для n, α, power, effect (планируется)."),
+                        "Классические формулы для n, α, power, effect."),
       
-      create_block_card("block4", "Расчет выборки методом имитационного моделирования",
-                        "Симуляционный подбор n под заданную мощность (планируется).")
+      # create_block_card("block4", "Расчет выборки методом имитационного моделирования",
+      #                   "Симуляционный подбор n под заданную мощность (планируется).")
     )
   )
 }

@@ -190,3 +190,10 @@
   z-index: 99999 !important; 
   
 }
+
+/* tighter horizontal gutters for rows with class="tight" */
+.row.tight {
+  margin-left: -40px;
+  margin-right: -40px;
+}
+

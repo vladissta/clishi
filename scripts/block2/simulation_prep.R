@@ -8,7 +8,8 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       distribution = input$dist_type_sim,
       mu = input$mu,
       sigma = input$sigma,
-      mu_0 = input$mu_0
+      mu_0 = input$mu_0,
+      sample_size = input$sample_size
     ),
     
     "t_two_sample" = list(
@@ -17,7 +18,8 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       mu1 = input$mu1,
       sigma1 = input$sigma1,
       mu2 = input$mu2,
-      sigma2 = input$sigma2
+      sigma2 = input$sigma2,
+      sample_size = input$sample_size
     ),
     
     "mann_whitney" = list(
@@ -26,7 +28,8 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       mu1 = input$mu1,
       sigma1 = input$sigma1,
       mu2 = input$mu2,
-      sigma2 = input$sigma2
+      sigma2 = input$sigma2,
+      sample_size = input$sample_size
     ),
     
     "brunner_munzel" = list(
@@ -35,7 +38,8 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       mu1 = input$mu1,
       sigma1 = input$sigma1,
       mu2 = input$mu2,
-      sigma2 = input$sigma2
+      sigma2 = input$sigma2,
+      sample_size = input$sample_size
     ),
     
     "contingency_tables" = {
@@ -44,7 +48,8 @@ create_simulation_args <- function(input, parameter_name = NULL) {
       args <- list(
         fun = generation_binary_experiment,
         design = input$trial_type,
-        method = input$test_method
+        method = input$test_method,
+        sample_size = input$sample_size
       )
       
       if (input$trial_type == "cohort") {
@@ -82,13 +87,13 @@ create_simulation_args <- function(input, parameter_name = NULL) {
 
   valid_params <- switch(
     input$test_type,
-    "t_one_sample" = c("fun", "distribution", "mu", "sigma", "mu_0"),
-    "t_two_sample" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
-    "mann_whitney" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
-    "brunner_munzel" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2"),
+    "t_one_sample" = c("fun", "distribution", "mu", "sigma", "mu_0", "sample_size"),
+    "t_two_sample" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2", "sample_size"),
+    "mann_whitney" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2", "sample_size"),
+    "brunner_munzel" = c("fun", "distribution", "mu1", "sigma1", "mu2", "sigma2", "sample_size"),
     "contingency_tables" = c("fun", "design", "method", "event_probability", 
                              "exposure_probability", "exposure_proportion", 
-                             "event_proportion", "RR", "basic_risk"),
+                             "event_proportion", "RR", "basic_risk", "sample_size"),
     character(0)
   )
   
@@ -104,17 +109,37 @@ create_simulation_args <- function(input, parameter_name = NULL) {
 }
 
 
-
 create_defualt_grid <- function(session, parameter_name){
   
-  if (identical(parameter_name, "sample_size")) {
-    updateNumericInput(session, "parameter_from", value = 10,  min = 1)
-    updateNumericInput(session, "parameter_to",   value = 100, min = 2)
-    updateNumericInput(session, "parameter_by",   value = 10,  min = 1)
+  if (parameter_name == "sample_size") {
+    updateNumericInput(session, "parameter_from", value = 10,  min = 1, step = 1)
+    updateNumericInput(session, "parameter_to",   value = 100, min = 2, step = 1)
+    updateNumericInput(session, "parameter_by",   value = 10,  min = 1, step = 1)
+    
   } else if (startsWith(parameter_name, "sigma")) {
-    updateNumericInput(session, "parameter_from", value = 1,  min = 0.01)
-    updateNumericInput(session, "parameter_to",   value = 10, min = 0.01)
-    updateNumericInput(session, "parameter_by",   value = 1,  min = 0.01)
+    updateNumericInput(session, "parameter_from", value = 1, min = 0.01, step = 0.1)
+    updateNumericInput(session, "parameter_to",   value = 10,  min = 0.01, step = 0.1)
+    updateNumericInput(session, "parameter_by",   value = 1, min = 0.01, step = 0.1)
+    
+  } else if (startsWith(parameter_name, "mu")) {
+    # mu, mu_0, mu1, mu2
+    updateNumericInput(session, "parameter_from", value = 0,  step = 0.1)
+    updateNumericInput(session, "parameter_to",   value = 1,  step = 0.1)
+    updateNumericInput(session, "parameter_by",   value = 0.1, min = 0.01, step = 0.1)
+    
+  } else if (parameter_name %in% c(
+    "event_probability", "exposure_probability",
+    "exposure_proportion", "event_proportion",
+    "basic_risk"
+  )) {
+    # probabilities/proportions in [0,1]
+    updateNumericInput(session, "parameter_from", value = 0.05, min = 0, max = 1, step = 0.1)
+    updateNumericInput(session, "parameter_to",   value = 0.95, min = 0, max = 1, step = 0.1)
+    updateNumericInput(session, "parameter_by",   value = 0.05, min = 0.01, step = 0.1)
+    
+  } else if (identical(parameter_name, "RR")) {
+    updateNumericInput(session, "parameter_from", value = 0.8, min = 0.01, step = 0.1)
+    updateNumericInput(session, "parameter_to",   value = 3.0, min = 0.01, step = 0.1)
+    updateNumericInput(session, "parameter_by",   value = 0.2, min = 0.01, step = 0.1)
   }
-  
 }

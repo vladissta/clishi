@@ -35,7 +35,6 @@ sidebar_block3_sample_size_calc_input <- function() {
   )
 }
 
-
 sidebar_block3_dynamic_inputs <- function(data_type, hypothesis) {
   tagList(
     if (data_type == "proportion") {
@@ -104,4 +103,21 @@ sidebar_block3_dynamic_inputs <- function(data_type, hypothesis) {
       )
     }
   )
+}
+
+create_block3_content <- function() {
+  tagList(
+  h3("Результаты расчета выборки"),
+  br(),
+  verbatimTextOutput("result_sample_size_calc"),
+  br(),
+  h4("Инструкция по использованию:"),
+  tags$ol(
+    tags$li("Выберите тип данных (количественные или качественные)"),
+    tags$li("Выберите тип исследования (превосходство или не меньшая эффективность)"),
+    tags$li("Задайте параметры alpha и beta (обычно 0.05 и 0.2)"),
+    tags$li("Задайте параметр k - соотношение между группой терапии и контроля"),
+    tags$li("Заполните специфичные параметры для выбранного типа данных"),
+    tags$li("Нажмите кнопку 'Рассчитать объем выборки'")
+  ))
 }
