@@ -9,7 +9,6 @@ library(DT)
 library(shinyjs)
 library(shinycssloaders)
 
-library(tictoc)
 library(furrr)
 library(future)
 
