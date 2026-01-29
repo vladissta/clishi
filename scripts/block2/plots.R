@@ -15,7 +15,7 @@ parameters_grid_line_plot <- function(simulation_vector,
     scale_y_continuous(breaks = c(0, alpha, seq(0, ymax, by = 0.1)), 
                        limits = c(0, ymax)) +
     scale_x_continuous(breaks = param_values) +
-    labs(x = parameter_name, y = 'Доля экспериментов с стат. значимым результатом') +
+    labs(x = parameter_name, y = 'Доля экспериментов со стат. значимым результатом') +
     geom_hline(aes(yintercept = alpha), col='red', lty=2) +
     theme_bw() +
     theme(axis.text = element_text(size=12),
