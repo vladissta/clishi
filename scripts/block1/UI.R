@@ -47,11 +47,12 @@ sidebar_block1_hypothesis_inputs <- function() {
     tags$hr(),
     h4("Гипотеза о математическом ожидании"),
     fluidRow(
-      column(6, checkboxInput("use_true_mu", create_tooltip("μ₀ = μ", "Установить μ₀ равным μ"), TRUE)),
-      column(6, numericInput("mu0", create_tooltip("μ₀", "Гипотетическое значение"), 0))
+      column(6, checkboxInput("use_true_mu", create_tooltip("μ₀ = μ", "Если включено, устанавливаем μ₀ равным истинному μ (и фиксируем μ₀)"), TRUE)),
+      column(6, numericInput("mu0", 
+                             create_tooltip("μ₀", "Гипотетическое значение математического ожидания (H₀: μ = μ₀)"), 0))
     ),
     selectInput(
-      "alt_type", create_tooltip("H₁", "Тип альтернативной гипотезы"),
+      "alt_type", create_tooltip("H₁", "Тип альтернативной гипотезы H₁"),
       choices = c(
         "двусторонняя (μ ≠ μ₀)" = "two.sided",
         "правосторонняя (μ > μ₀)" = "greater",
@@ -104,7 +105,7 @@ create_block1_content <- function(){
         ),
         box(
           width = 7,
-          uiOutput("type1_slider_ui")  # <--  слайдер ошибок I рода
+          uiOutput("smart_slider_ui")  # <-- один умный слайдер (I или II)
         )
       ),
       fluidRow(
