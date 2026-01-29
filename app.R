@@ -26,7 +26,7 @@ source('scripts/block1/help.R')
 source('scripts/block2/simulation_prep.R')
 source('scripts/block2/simulation_wrapper.R')
 source('scripts/block2/plots.R')
-source('scripts/block2/texts.R')
+# source('scripts/block2/texts.R')
 source('scripts/block2/UI.R')
 ## tests
 list.files('scripts/block2/tests', full.names = TRUE) %>% 
