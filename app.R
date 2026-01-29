@@ -300,53 +300,107 @@ server <- function(input, output, session) {
     which(df_from_sim()$p_value < input$alpha)
   })
   
-  output$type1_slider_ui <- renderUI({
-    req(input$top_block == "block1", 
-        input$block1_subtab == "one_exp")   # показывать на вкладке "Одна выборка"
+  # Ошибка II рода: не отвергли H0 (p >= alpha), когда H0 ложна (mu0 != true_mu)
+  type2_ids <- reactive({
+    df <- df_from_sim()
+    alpha <- input$alpha
+    mu_is_equal <- isTRUE(all.equal(input$mu0, true_mu()))
     
-    if (!isTRUE(input$use_true_mu)) {
-      return(tags$div(style="color:#b8c7ce;",
-                      "Включи μ₀ = μ, чтобы отобразить ошибки I рода."))
+    if (mu_is_equal) return(integer(0))   # если H0 истинна, то Type II тут не считаем
+    
+    which(df$p_value >= alpha)
+  })
+  
+  output$smart_slider_ui <- renderUI({
+    req(input$top_block == "block1")
+    req(input$block1_subtab == "one_exp")
+    req(df_from_sim())
+    
+    mu_is_equal <- isTRUE(all.equal(input$mu0, true_mu()))
+    
+    # 1) Режим H0 истинна: показываем только Type I (и только если включена галочка)
+    if (mu_is_equal) {
+      if (!isTRUE(input$use_true_mu)) {
+        return(tags$div(style="color:#b8c7ce;",
+                        "Если μ₀ = μ, включи галочку «μ₀ = μ», чтобы смотреть ошибки I рода."))
+      }
+      
+      ids <- type1_ids()
+      if (length(ids) == 0) {
+        return(tags$div(style="color:#b8c7ce;",
+                        "Ошибок I рода (p < α) не найдено при текущих параметрах."))
+      }
+      
+      return(tagList(
+        sliderInput(
+          "smart_pick",
+          "Эксперименты с ошибкой I рода (p < α при μ₀ = μ)",
+          min = 1, max = length(ids), value = 1, step = 1
+        ),
+        tags$small(
+          style="color:#b8c7ce; display:block; margin-top:6px;",
+          paste0("Найдено: ", length(ids), " из ", input$n_sim,
+                 " (доля = ", round(length(ids)/input$n_sim, 3), ")")
+        )
+      ))
     }
     
-    ids <- type1_ids()
+    # 2) Режим H0 ложна (μ0 != μ): показываем Type II
+    if (isTRUE(input$use_true_mu)) {
+      # защита от странного состояния: галочка включена, но mu0 уже не равен μ
+      return(tags$div(style="color:#b8c7ce;",
+                      "Сейчас μ₀ ≠ μ. Отключи галочку «μ₀ = μ», чтобы смотреть ошибку II рода."))
+    }
     
+    ids <- type2_ids()
     if (length(ids) == 0) {
       return(tags$div(style="color:#b8c7ce;",
-                      "Ошибок I рода (p < α) не найдено."))}
+                      "Ошибок II рода (p ≥ α при μ₀ ≠ μ) не найдено при текущих параметрах."))
+    }
     
     tagList(
       sliderInput(
-        "type1_pick",
-        "Эксперименты с ошибкой I рода (p < α при μ₀ = μ)",
-        min = 1,
-        max = length(ids),
-        value = 1,
-        step = 1
+        "smart_pick",
+        "Эксперименты с ошибкой II рода (p ≥ α при μ₀ ≠ μ)",
+        min = 1, max = length(ids), value = 1, step = 1
       ),
-      
       tags$small(
         style="color:#b8c7ce; display:block; margin-top:6px;",
-        sprintf("Найдено: %d из %d (доля = %.3f)", 
-                length(ids), input$n_sim, 
-                length(ids) / input$n_sim)
+        paste0("Найдено: ", length(ids), " из ", input$n_sim,
+               " (доля = ", round(length(ids)/input$n_sim, 3), ")")
       )
     )
   })
   
-  observeEvent(input$type1_pick, {
-    req(isTRUE(input$use_true_mu))
-    req(length(type1_ids()) > 0)
-    updateSliderInput(session, "exp_id", 
-                      value = type1_ids()[input$type1_pick])
+  # Один обработчик: выбираем нужный эксперимент из Type I или Type II и обновляем exp_id
+  observeEvent(input$smart_pick, {
+    req(df_from_sim())
+    
+    mu_is_equal <- isTRUE(all.equal(input$mu0, true_mu()))
+    
+    if (mu_is_equal) {
+      req(isTRUE(input$use_true_mu))
+      ids <- type1_ids()
+      req(length(ids) > 0)
+      exp_selected <- ids[input$smart_pick]
+      updateSliderInput(session, "exp_id", value = exp_selected)
+    } else {
+      req(!isTRUE(input$use_true_mu))
+      ids <- type2_ids()
+      req(length(ids) > 0)
+      exp_selected <- ids[input$smart_pick]
+      updateSliderInput(session, "exp_id", value = exp_selected)
+    }
   }, ignoreInit = TRUE)
   
+  
   observeEvent(df_from_sim(), {
+    updateSliderInput(session, "smart_pick", value = 1)   # <-- сбрасывать smart_pick в 1 при каждом новом моделировании
+    
     updateSliderInput(
       session, "exp_id",
       max = input$n_sim,
-      # value = min(1, input$n_sim)
-      value = 1
+      value = min(1, input$n_sim)
     )
     
     try(
