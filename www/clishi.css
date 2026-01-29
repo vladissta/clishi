@@ -73,21 +73,21 @@
 }
 
 /* ===== Sticky footer ===== */
-/* ===== FIXED sidebar footer buttons ===== */
 .clishi-sticky-footer{
-  position: fixed;                 /* ВАЖНО чтобы она оставалась фиксированной*/
+  position: fixed;
   bottom: 0;
   left: 0;
-  width: 300px;                    /* ширина sidebar */
-  padding: 10px;
+  width: 320px;
+  padding: 10px 30px;
   background: #1e282c;
   border-top: 1px solid rgba(255,255,255,0.08);
   z-index: 1000;
-}
+  box-sizing: border-box;
+} /* ← This closing brace was missing! */
 
 /* чтобы контент sidebar не залезал под кнопки */
 .skin-blue .sidebar{
-  padding-bottom: 120px !important;          /* запас под 2 кнопки */
+  padding-bottom: 120px !important;
 }
 
 /* ===== Sidebar typography ===== */

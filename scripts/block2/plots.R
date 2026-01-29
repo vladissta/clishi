@@ -17,6 +17,8 @@ parameters_grid_line_plot <- function(simulation_vector,
     scale_x_continuous(breaks = param_values) +
     labs(x = parameter_name, y = 'Доля экспериментов с стат. значимым результатом') +
     geom_hline(aes(yintercept = alpha), col='red', lty=2) +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text = element_text(size=12),
+          axis.title = element_text(size=15))
   
 }

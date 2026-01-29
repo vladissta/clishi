@@ -175,8 +175,8 @@ sidebar_block2_tests_inputs <- function() {
       ),
       h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu2", create_tooltip("μ₁", "Среднее второй выборки"), value = 20)),
-        column(6, numericInput("sigma2", create_tooltip("σ₁", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
+        column(6, numericInput("mu2", create_tooltip("μ2", "Среднее второй выборки"), value = 20)),
+        column(6, numericInput("sigma2", create_tooltip("σ2", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
       )
     ),
     
@@ -199,8 +199,8 @@ sidebar_block2_tests_inputs <- function() {
       ),
       h5("Выборка 2", style = "margin-top: 5px; margin-bottom: 0px; margin-left: 15px;"),
       fluidRow(
-        column(6, numericInput("mu2", create_tooltip("μ₁", "Среднее второй выборки"), value = 20)),
-        column(6, numericInput("sigma2", create_tooltip("σ₁", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
+        column(6, numericInput("mu2", create_tooltip("μ2", "Среднее второй выборки"), value = 20)),
+        column(6, numericInput("sigma2", create_tooltip("σ2", "Стандартное отклонение второй выборки"), value = 2, min = 0.0001))
       )
     ))}
 
@@ -332,4 +332,17 @@ sidebar_parameter_selection <- function() {
                              value = 0.05, min = 0.001, max = 0.999))
     )
   )
+}
+
+
+disable_variable_parameter <- function(parameter_name){
+  # Enable the previous parameter if it exists
+  if (!is.null(last_par_name())) {
+    shinyjs::enable(last_par_name())
+  }
+  # Update and disable the current parameter
+  updateNumericInput(session, parameter_name, value = NULL)
+  shinyjs::disable(parameter_name)
+  # Store the current parameter as the last one
+  last_par_name(parameter_name)
 }

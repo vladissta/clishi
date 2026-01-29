@@ -549,6 +549,26 @@ server <- function(input, output, session) {
           alpha = input$alpha
     )))
   })
+  
+  # Disable parameter which is being varied in the grid
+  last_par_name <- reactiveVal(NULL)
+  
+  observeEvent(input$test, {
+    if (!is.null(last_par_name())) {
+      shinyjs::enable(last_par_name())
+      last_par_name(NULL)
+    }
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$parameter_name, {
+    if (!is.null(last_par_name())) {
+      shinyjs::enable(last_par_name())
+    }
+    updateNumericInput(session, input$parameter_name, value = NULL)
+    shinyjs::disable(input$parameter_name)
+    last_par_name(input$parameter_name)
+  }, ignoreInit = TRUE)
+  
 
   output$parameters_grid_line_plot <- renderPlot({
     parameters_grid_line_plot(grid_output_values(), 
