@@ -9,7 +9,8 @@ sample_size_results_text <- function(result_sample_size_calc, input){
         "(", result_sample_size_calc$n1, " в группу 1 (терапии), ", result_sample_size_calc$n2, " в группу 2 (контроль)", ")", "\n",
         "С учетом 20% выбываемости во время исследования и 10% выбываемости", "\n", 
         "во время скрининга, объем выборки составит ", result_sample_size_calc$total_study, " пациентов", "\n",
-        "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)")
+        "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)", "\n",
+        "Расчет произведен с помощью приложения CliShi")
       
 
     } else {
@@ -21,7 +22,8 @@ sample_size_results_text <- function(result_sample_size_calc, input){
         "(", result_sample_size_calc$n1, " в группу 1 (терапии), ", result_sample_size_calc$n2, " в группу 2 (контроль)", ")", "\n",
         "С учетом 20% выбываемости во время исследования и 10% выбываемости", "\n", 
         "во время скрининга, объем выборки составит ", result_sample_size_calc$total_study, " пациентов", "\n",
-        "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)")
+        "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)", "\n",
+        "Расчет произведен с помощью приложения CliShi")
     }}
   else {
       if (input$hypothesis == "superiority") {
@@ -33,7 +35,8 @@ sample_size_results_text <- function(result_sample_size_calc, input){
           "(", result_sample_size_calc$n1, " в группу 1 (терапии), ", result_sample_size_calc$n2, " в группу 2 (контроль)", ")", "\n",
           "С учетом 20% выбываемости во время исследования и 10% выбываемости", "\n", 
           "во время скрининга, объем выборки составит ", result_sample_size_calc$total_study, " пациентов", "\n",
-          "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)")
+          "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)", "\n",
+          "Расчет произведен с помощью приложения CliShi")
 
         
       } else {
@@ -45,7 +48,8 @@ sample_size_results_text <- function(result_sample_size_calc, input){
           "(", result_sample_size_calc$n1, " в группу 1 (терапии), ", result_sample_size_calc$n2, " в группу 2 (контроль)", ")", "\n",
           "С учетом 20% выбываемости во время исследования и 10% выбываемости", "\n", 
           "во время скрининга, объем выборки составит ", result_sample_size_calc$total_study, " пациентов", "\n",
-          "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)")
+          "(", ceiling(ceiling(result_sample_size_calc$n1 / 0.8) / 0.9), " в группу 1, ", ceiling(ceiling(result_sample_size_calc$n2 / 0.8) / 0.9), " в группу 2)", "\n",
+          "Расчет произведен с помощью приложения CliShi")
     }
     
   }
