@@ -41,7 +41,6 @@ simulation_wrapper <- function(fun,
                                parameter, grid,
                                cores = availableCores() - 1,
                                seed, ...) {
-  
   plan(future.callr::callr, workers = cores)
   
   output_vector <-

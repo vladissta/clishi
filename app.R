@@ -9,6 +9,7 @@ library(DT)
 library(shinyjs)
 library(shinycssloaders)
 
+library(tictoc)
 library(furrr)
 library(future)
 
@@ -26,6 +27,7 @@ source('scripts/block1/help.R')
 source('scripts/block2/simulation_prep.R')
 source('scripts/block2/simulation_wrapper.R')
 source('scripts/block2/plots.R')
+source('scripts/block2/simulation_check_args.R')
 # source('scripts/block2/texts.R')
 source('scripts/block2/UI.R')
 ## tests
@@ -534,7 +536,11 @@ server <- function(input, output, session) {
   
   grid_output_values <- eventReactive(input$run_block2, {
     req(sim_args())
-    
+    check_sim_args(
+      test_type = input$test_type, 
+      sim_args = sim_args(),
+      alpha = input$alpha
+    )
     do.call(
       simulation_wrapper,
       c(sim_args(),

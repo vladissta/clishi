@@ -24,7 +24,7 @@ get_test <- function(method, cont_tables, alpha = 0.05, correct = FALSE){
   result <- c()
   for (cont_table_num in seq_along(cont_tables)) {
     if (method == "chi") {
-      result[cont_table_num] <- chisq.test(cont_tables[[cont_table_num]], correct = correct)$p.value
+      result[cont_table_num] <- suppressWarnings(chisq.test(cont_tables[[cont_table_num]], correct = correct)$p.value)
     } else {
       result[cont_table_num] <- fisher.test(cont_tables[[cont_table_num]])$p.value
     }
@@ -48,18 +48,6 @@ cross_sectional <- function(n_sim, sample_size, event_probability = 0.5, exposur
   cont_tables <- get_contingency_table(data)
   return(cont_tables)
 }
-
-# cross_sectional_RR <- function(n_sim, sample_size, RR, basic_risk) {
-#   data <- tibble(
-#     experiment = rep(1:n_sim, each = sample_size),
-#     
-#     
-#     
-#   )
-#   
-#   cont_tables <- get_contingency_table(data)
-#   return(cont_tables)
-# }
 
 cohort <- function(n_sim, sample_size, event_probability = 0.5, exposure_proportion) {
   n_exp   <- as.integer(round(sample_size * exposure_proportion))
