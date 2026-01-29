@@ -1,4 +1,5 @@
 sample_size_results_text <- function(result_sample_size_calc, input){
+  
   if (input$data_type == "proportion") {
     if (input$hypothesis == "superiority") {
       paste0(
