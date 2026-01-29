@@ -8,9 +8,13 @@ library(shinydashboard)
 library(DT)
 library(shinyjs)
 library(shinycssloaders)
+library(rclipboard)
 
 library(furrr)
 library(future)
+library(future.callr)
+
+library(checkmate)
 
 library(TrialSize)
 
@@ -153,7 +157,7 @@ dashboardSidebar(
     ## Block 3 UI ----
     conditionalPanel(
       condition = "input.top_block == 'block3'",
-      create_block3_content()
+      create_block3_content(),
     ),
     
     ## Block 4 UI ----
@@ -613,6 +617,26 @@ server <- function(input, output, session) {
     sidebar_block3_dynamic_inputs(input$data_type, 
                                   input$hypothesis)
   })
+
+  
+  result_sample_size_text <- reactiveVal("")
+
+  output$result_sample_size_calc <- renderText({
+    result_sample_size_text()
+  })
+
+  output$copy_button <- renderUI({
+
+    rclipButton(
+      inputId = "clipbtn",
+      label = "Скопировать результат",
+      clipText = result_sample_size_text(),
+      icon = icon("clipboard"),
+      tooltip = "Нажми, чтобы скопировать текст",
+      options = list(delay = list(show = 800, hide = 100),
+                     trigger = "hover")
+    )
+  })
   
   observeEvent(input$parameter_name, {
     create_defualt_grid(session, input$parameter_name)
@@ -621,16 +645,9 @@ server <- function(input, output, session) {
   observeEvent(input$run_block3, {
     result_sample_size_calc <- create_result_sample_size_calc(input)
     
-    if (!is.null(result_sample_size_calc$error)) {
-      output$result_sample_size_calc <- renderText({
-        paste("Ошибка:", result_sample_size_calc$error)})
-      return()
-      }
-    
-    output$result_sample_size_calc <- renderText({
+    result_sample_size_text(
       sample_size_results_text(result_sample_size_calc, input)
-    })
-    
+      )
   })
   
   ## BLOCK 4 Server ---- (to do)  

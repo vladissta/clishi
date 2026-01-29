@@ -106,10 +106,13 @@ sidebar_block3_dynamic_inputs <- function(data_type, hypothesis) {
 }
 
 create_block3_content <- function() {
+  rclipboardSetup()
+  
   tagList(
   h3("Результаты расчета выборки"),
   br(),
   verbatimTextOutput("result_sample_size_calc"),
+  uiOutput("copy_button"),
   br(),
   h4("Инструкция по использованию:"),
   tags$ol(
