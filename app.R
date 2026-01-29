@@ -528,8 +528,9 @@ server <- function(input, output, session) {
   # BLOCK 2 Server----
 
   sim_args <- reactive({
-    req(input$test_type)
-    create_simulation_args(input, parameter_name = input$parameter_name)
+    # req(input$test_type)
+    create_simulation_args(input, 
+                           parameter_name = input$parameter_name)
   })
   
   grid_output_values <- eventReactive(input$run_block2, {
@@ -553,11 +554,16 @@ server <- function(input, output, session) {
   # Disable parameter which is being varied in the grid
   last_par_name <- reactiveVal(NULL)
   
-  observeEvent(input$test, {
+  observeEvent(input$test_type, {
     if (!is.null(last_par_name())) {
       shinyjs::enable(last_par_name())
-      last_par_name(NULL)
+      # last_par_name(NULL)
     }
+    
+    updateSelectInput(session, "parameter_name", selected = 'sample_size')
+    shinyjs::disable(input$parameter_name)
+    last_par_name(input$parameter_name)
+    
   }, ignoreInit = TRUE)
   
   observeEvent(input$parameter_name, {

@@ -121,7 +121,7 @@ sidebar_block2_tests_inputs <- function() {
         conditionalPanel(
           condition = "input.cohort_method == 'rr_mode'",
           numericInput("basic_risk", "Базовый риск", 
-                       value = NULL, min = 0, max = 1, step = 0.01),
+                       value = NULL, min = 0, max = 0.999, step = 0.01),
           numericInput("RR", "Отношение рисков (RR)", 
                        value = 1.5, min = 0, max = 10, step = 0.01),
           helpText("Вероятность в группе воздействия будет рассчитана как базовый риск * RR")

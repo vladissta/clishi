@@ -220,6 +220,9 @@ generation_binary_experiment <- function(
   if (design %in% c("case_control", "fisher")) {
     assert_number(event_proportion, lower = 0.001, upper = 0.999)
   }
+  if (design %in% c("case_control")) {
+    assert_number(exposure_probability, lower = 0.001, upper = 0.999)
+  }
   if (design %in% c("fisher")) {
     assert_number(exposure_proportion, lower = 0.001, upper = 0.999)
   } 
@@ -267,4 +270,3 @@ generation_binary_experiment <- function(
   
   return(get_test(method, cont_tables, alpha, correct))
 }
-
