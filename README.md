@@ -1,4 +1,4 @@
-# CliShi <img border="0" src="www/clishi_logo.png" alt="The 'future' hexlogo" align="right"/>
+# CliShi <img border="0" src="www/clishi_logo.png" width = 200 align="right"/>
 
 Shiny application for interactive analysis and simulation. This repo contains the main app (`app.R`) plus modular scripts and static assets.
 
