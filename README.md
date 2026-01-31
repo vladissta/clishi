@@ -7,6 +7,21 @@ Shiny application for interactive analysis and simulation. This repo contains th
 -   R (\>= 4.5 recommended)
 -   Internet access for first-time package installation
 
+## Download the app
+
+Option A: Clone with Git:
+
+``` bash
+git clone https://github.com/BIOSTAT/CLISHI_PROJECT.git
+cd CLISHI_PROJECT
+```
+
+Option B: Download a ZIP:
+
+1. Go to the GitHub repository page.
+2. Click **Code** → **Download ZIP**.
+3. Unzip the archive and open the folder in R.
+
 ## Install dependencies
 
 From the project root in R:
@@ -38,3 +53,12 @@ shiny::runApp("app.R")
 ``` r
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 ```
+
+## Authors
+
+-   [Bektur Berdibekov](https://github.com/BekturBerdibekov)
+-   [Danil Tukanov](https://github.com/DataDaniel010)
+-   [Daria Kuznetcova](https://github.com/daria-kuznetcova)
+-   [Mariia Akhmetova](https://github.com/Hemofixic)
+-   [Vladislav Stanin](https://github.com/vladissta)
+-   [Evgeny Bakin](https://github.com/evgeny-bakin)
