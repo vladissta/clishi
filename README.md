@@ -2,6 +2,9 @@
 
 Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulator serves as a platform for learning important statistical concepts and interactive software for performing common clinical research tasks
 
+> [!NOTE]
+> Wow!
+
 ## Contents
 
 - [Motivation](#motivation)
@@ -26,7 +29,7 @@ Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulat
 - Modelling clinical trials is an easy and effective way to explore statistical methods without having a real data
 - Educational purposes: visual explanation of complex statistical ideas
 
-**[Shiny]() allows to create interactive applications to make statistical decisions easier, visually and without coding**
+**[Shiny](https://github.com/rstudio/shiny) allows to create interactive applications to make statistical decisions easier, visually and without coding**
 
 ## Blocks
 
@@ -112,6 +115,7 @@ From the project root in R:
 ``` r
 source("install.R")
 ```
+
 OR install dependencies manually:
 
 + `ggplot2`  
