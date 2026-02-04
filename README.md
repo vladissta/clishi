@@ -5,14 +5,12 @@ Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulat
 ## Contents
 
 - [Motivation](#motivation)
-- [Blocks](#blocks) 
-	- [Block 1. Hypothesis Modeling and Testing](#block-1-hypothesis-modeling-and-testing)
-	- [Block 2. Evaluation of test results dependence on parameter values](#block-2-evaluation-of-test-results-dependence-on-parameter-values)
-	- [Block 3. Sample size calculation using classical methods](#block-3-sample-size-calculation-using-classical-methods)  
-	*New blocks are planned to be added...*
+- [Blocks](#blocks)
+  - [Block 1. Hypothesis Modeling and Testing](#block-1-hypothesis-modeling-and-testing)
+  - [Block 2. Evaluation of test results dependence on parameter values](#block-2-evaluation-of-test-results-dependence-on-parameter-values)
+  - [Block 3. Sample size calculation using classical methods](#block-3-sample-size-calculation-using-classical-methods)  
+	*New blocks are planned to be added...*  
 - [Future plans](#future-plans)
-
-
 - [Requirements](#requirements)
 - [Download the app](#download-the-app)
 - [Install dependencies](#install-dependencies)
