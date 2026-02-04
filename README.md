@@ -1,6 +1,49 @@
 # CliShi <img border="0" src="www/clishi_logo.png" alt="CLISHI logo" width="200" align="right"/>
 
-Shiny application for interactive analysis and simulation. This repo contains the main app (`app.R`) plus modular scripts and static assets.
+Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulator serves as a platform for learning important statistical concepts and interactive software for performing common clinical research tasks
+
+## Motivation
+
+- Researchers often do not code in R
+- Interactive and visual approach makes easier to understand main statistical concepts
+- Modelling clinical trials is an easy and effective way to explore statistical methods without having a real data
+- Educational purposes: visual explanation of complex statistical ideas
+
+**[Shiny]() allows to create interactive applications to make statistical decisions easier, visually and without coding**
+
+## Contents
+
+1. [Block 1. Hypothesis Modeling and Testing](#block1)
+2. [Block 2. Evaluation of test results dependence on parameter values](#block2)
+3. [Block 3. Sample size calculation using classical methods](#block3)
+4. *New blocks are planned to be added...*
+
+### Block 1. Hypothesis Modeling and Testing {#block1}
+
+<p align="center">
+  <img src="./demo/block1.gif" alt="block1" width="600"/>
+</p>
+
+### Block 2. Evaluation of test results dependence on parameter valuesng {#block2}
+
+<p align="center">
+  <img src="./demo/block2.gif" alt="block1" width="600"/>
+</p>
+
+### Block 3. Sample size calculation using classical methods {#block3}
+
+<p align="center">
+  <img src="./demo/block3.gif" alt="block1" width="600"/>
+</p>
+
+## Parallel computation speed
+
+|**Number of CPUs used** |   1  |   2  |   3  |   4  |   5  |   6  |  7  |
+|:-----------------------:|:----:|:----:|:----:|:----:|:----:|:----:|:---:|
+|  **Simulation time of Chi-Square test**<br>(29 steps grid, 10000 samples), s | 49.5 | 30.6 | 22.6 | 18.9 | 16.5 | 15.5 |  14 |
+| **Simulation time Brunner-Munzel test**<br>(9 steps grid, 1000 samples), s | 25 | 14.3 | 11.4 | 10.8 |  8.5 |  8.6 | 9.3 |
+
+*Tested on 11th Gen Intel(R) Core(TM) i7-11800H @ 2.30GHz, 8 cores. OS: Windows*
 
 ## Requirements
 
