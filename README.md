@@ -10,10 +10,14 @@ Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulat
   - [Block 2. Evaluation of test results dependence on parameter values](#block-2-evaluation-of-test-results-dependence-on-parameter-values)
   - [Block 3. Sample size calculation using classical methods](#block-3-sample-size-calculation-using-classical-methods)  
 	*New blocks are planned to be added...*  
-- [Future plans](#future-plans)
-- [Requirements](#requirements)
-- [Download the app](#download-the-app)
-- [Install dependencies](#install-dependencies)
+- [Requirements](#requirements)  
+- [Download the app](#download-the-app)  
+- [Install dependencies](#install-dependencies)  
+- [Run the app](#run-the-app)  
+- [Project structure](#project-structure)  
+- [Troubleshooting](#troubleshooting)  
+- [Future plans](#future-plans)  
+- [Authors](#authors)
 
 ## Motivation
 
@@ -81,13 +85,6 @@ For our application, we used the `TrialSize` (ver. 1.4.1) and two main functions
 
 You can calculate sample size for both non-inferiority and superiority hypotheses types. You can specify the data type in the sidebar: whether it is quantitative or qualitative and so determine which formula will be used. The application displays text you can copy by clicking on the button and paste into your synopsis.
 
-## Future plans
-+ Sequential/adaptive designs  
-+ Bioequivalence studies  
-+ Survival analysis  
-+ Longitudinal studies  
-+ Regression modeling (linear, logistic, Cox)  
-
 ## Requirements
 
 -   R (\>= 4.5 recommended)
@@ -95,14 +92,14 @@ You can calculate sample size for both non-inferiority and superiority hypothese
 
 ## Download the app
 
-Option A: Clone with Git:
+Clone with Git:
 
 ``` bash
 git clone https://github.com/BIOSTAT/CLISHI_PROJECT.git
 cd CLISHI_PROJECT
 ```
 
-Option B: Download a ZIP:
+OR download a ZIP:
 
 1. Go to the GitHub repository page.
 2. Click **Code** → **Download ZIP**.
@@ -115,6 +112,23 @@ From the project root in R:
 ``` r
 source("install.R")
 ```
+OR install dependencies manually:
+
++ `ggplot2`  
++ `dplyr`  
++ `tidyr`  
++ `shiny`  
++ `shinydashboard`  
++ `shinyjs`  
++ `shinycssloaders`  
++ `DT`  
++ `rclipboard`  
++ `furrr`  
++ `future`  
++ `future.callr`  
++ `checkmate`  
++ `TrialSize`  
+
 
 ## Run the app
 
@@ -139,6 +153,13 @@ shiny::runApp("app.R")
 ``` r
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 ```
+
+## Future plans
++ Sequential/adaptive designs  
++ Bioequivalence studies  
++ Survival analysis  
++ Longitudinal studies  
++ Regression modeling (linear, logistic, Cox)  
 
 ## Authors
 
