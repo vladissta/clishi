@@ -2,9 +2,6 @@
 
 Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulator serves as a platform for learning important statistical concepts and interactive software for performing common clinical research tasks
 
-> [!NOTE]
-> Wow!
-
 ## Contents
 
 - [Motivation](#motivation)
@@ -32,6 +29,9 @@ Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulat
 **[Shiny](https://github.com/rstudio/shiny) allows to create interactive applications to make statistical decisions easier, visually and without coding**
 
 ## Blocks
+
+> [!IMPORTANT]
+> Currently, the entire interface text is only in Russian
 
 ### Block 1. Hypothesis Modeling and Testing
 
