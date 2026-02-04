@@ -13,24 +13,24 @@ Interactive **Cli**nical Research Simulator - **Shi**ny Application. The simulat
 
 ## Contents
 
-1. [Block 1. Hypothesis Modeling and Testing](#block1)
-2. [Block 2. Evaluation of test results dependence on parameter values](#block2)
-3. [Block 3. Sample size calculation using classical methods](#block3)
+1. [Block 1. Hypothesis Modeling and Testing](#block-1-hypothesis-modeling-and-testing)
+2. [Block 2. Evaluation of test results dependence on parameter values](#block-2-evaluation-of-test-results-dependence-on-parameter-values)
+3. [Block 3. Sample size calculation using classical methods](#block-3-sample-size-calculation-using-classical-methods)
 4. *New blocks are planned to be added...*
 
-### Block 1. Hypothesis Modeling and Testing {#block1}
+### Block 1. Hypothesis Modeling and Testing
 
 <p align="center">
   <img src="./demo/block1.gif" alt="block1" width="600"/>
 </p>
 
-### Block 2. Evaluation of test results dependence on parameter valuesng {#block2}
+### Block 2. Evaluation of test results dependence on parameter values
 
 <p align="center">
   <img src="./demo/block2.gif" alt="block1" width="600"/>
 </p>
 
-### Block 3. Sample size calculation using classical methods {#block3}
+### Block 3. Sample size calculation using classical methods
 
 <p align="center">
   <img src="./demo/block3.gif" alt="block1" width="600"/>
